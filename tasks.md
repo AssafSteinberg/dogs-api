@@ -72,6 +72,7 @@ Test files live in `tests/`, named after the unit (e.g. `tests/leaf.test.ts`). "
 #### T05 · Dog CEO API client · `task/05-dog-api-client`
 - **Scope:** `src/api/dogApi.ts`: `fetchBreedList(signal)` and `fetchRandomImage(leaf, signal)`, `async`/`await` with `try/catch`, using the guards (architecture 6.1).
 - **Tests (red first, `fetch` stubbed):** (1) the list call requests `/breeds/list/all` and returns parsed data; (2) a sub-breed leaf requests `/breed/hound/afghan/images/random` and a breed-only leaf requests `/breed/akita/images/random` (never the breed endpoint for a sub-breed); (3) a rejected `fetch` becomes `ApiError` `kind: 'network'`; (4) HTTP 404 and 500 become `kind: 'http'` with the status code; (5) an aborted request is distinguishable from a failure.
+- **Also:** `tests/dog-api.live.test.ts` calls the real API and runs only with `npm run test:live` (a separate Vitest project), so it is not part of the `npm test` milestone gate.
 - **Done when:** tests green; no `new Promise` or `.then` in the code.
 
 #### T06 · Filter and sort · `task/06-filter-sort`

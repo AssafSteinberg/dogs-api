@@ -259,11 +259,12 @@ Dev dependencies to add: `vitest`, `@vitest/ui`, `jsdom`, `@testing-library/reac
 
 | Script | Command | Purpose |
 |---|---|---|
-| `npm test` | `vitest run` | One-shot, non-interactive run; exits non-zero on any failure. This is the milestone gate |
-| `npm run test:ui` | `vitest --ui` | Opens the `@vitest/ui` dashboard to browse, filter and re-run tests while developing |
+| `npm test` | `vitest run --project unit` | One-shot, non-interactive, **offline** run; exits non-zero on any failure. This is the milestone gate |
+| `npm run test:ui` | `vitest --ui --project unit` | Opens the `@vitest/ui` dashboard to browse, filter and re-run the offline tests while developing |
+| `npm run test:live` | `vitest run --project live` | Runs the few tests that call the **real** Dog CEO API (`*.live.test.ts`). Needs internet; not part of the milestone gate |
 
 - Vitest is configured in `vite.config.ts` (`test: { environment: 'jsdom', setupFiles: 'tests/setup.ts', globals: false }`). `tests/setup.ts` registers the jest-dom matchers and stubs `Element.prototype.scrollIntoView`, which jsdom does not implement.
-- Tests run against `MemoryRouter` with `initialEntries` for deep links. `fetch` is replaced per test with `vi.stubGlobal('fetch', ...)`. **No test calls the real API**; fixtures in `tests/fixtures/` are small copies of real responses.
+- Tests run against `MemoryRouter` with `initialEntries` for deep links. `fetch` is replaced per test with `vi.stubGlobal('fetch', ...)`. **The offline suite never calls the real API**; fixtures in `tests/fixtures/` are small copies of real responses. The only tests that use the real API are the `*.live.test.ts` files, run on demand with `npm run test:live` (Vitest project `live`; `npm test` runs project `unit`). Live tests assert on stable facts (e.g. hound has an afghan sub-breed) rather than exact counts. They run in Node, so they cannot prove CORS behaviour; that is confirmed in the browser.
 
 ### 10.2 Test suite and milestone gate
 **A version or deployment milestone is cleared only when `npm test`, `npm run lint` and `npm run build` all pass.** The suite grows with the work, and **at least 5 tests must exist and pass from the first milestone on**. The planned suite, with UI tests marked:
