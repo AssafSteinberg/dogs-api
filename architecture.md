@@ -55,7 +55,7 @@ src/
   main.tsx                      createRoot + <BrowserRouter>
   app/
     App.tsx                     providers + routes
-    AppLayout.tsx               sidebar + <Outlet/>, banners
+    AppLayout.tsx               sidebar + <Outlet/>
   api/
     dogApi.ts                   fetchBreedList(), fetchRandomImage(leaf)
     guards.ts                   parseBreedList(unknown), parseImageResponse(unknown)
@@ -208,7 +208,7 @@ dogs-api:v1:collection   → { pack: Record<LeafId, number>, wishlist: LeafId[] 
 `state/storage.ts` is the only code that touches `localStorage`:
 - Every read and write is in `try/catch` (blocked storage, quota, private mode).
 - Reads parse JSON as `unknown` and run guards. Invalid or unknown-version data is discarded and replaced with an empty value, never partially trusted.
-- If storage is unavailable, the provider falls back to in-memory state and the UI shows a banner: "Your pack won't be saved in this browser" (PRD risk #7).
+- If storage is unavailable, the provider falls back to in-memory state and `storage.ts` logs a one-time `console.warn` that the Pack and Wishlist will not be saved (FR-U-4, PRD risk #7). There is no on-screen banner.
 - A stored ID that is no longer in the breed index is kept in storage but rendered on its page as "No longer available" with a remove button; it is never passed to the image API.
 - Cross-tab live sync via the `storage` event is out of scope; the other tab sees changes on its next load.
 
@@ -216,7 +216,7 @@ dogs-api:v1:collection   → { pack: Record<LeafId, number>, wishlist: LeafId[] 
 
 | Component | Responsibility |
 |---|---|
-| `AppLayout` | Sidebar, `<main>` landmark, storage-unavailable banner |
+| `AppLayout` | Sidebar and the `<main>` landmark |
 | `Sidebar` | `<nav>` with `NavLink`s to Breeds, Pack, Wishlist; collapsible (8.1) |
 | `BreedsPage` | Waits for the list, resolves the expanded leaf from the URL, applies filter/sort (5A), raises the not-found pop-up |
 | `BreedsToolbar` | Filter box, sort toggle, result count, breed-list `ApiStatus` badge |
@@ -248,7 +248,7 @@ The app must be fully usable from about 320 px wide up.
 | Breed list request fails | `ApiStatus` shows Failed; page-level error with Retry; red pop-up (6.5); sidebar and other pages stay usable |
 | Image request or file fails | `ApiStatus` shows Failed; error inside that row's details naming the breed, with Retry (6.3); red pop-up if the API is unreachable (6.5); list unaffected |
 | URL names an unknown leaf | Collapsed list + red pop-up naming the missing element, same component as 6.5 (FR-D-1b) |
-| `localStorage` blocked or corrupt | In-memory fallback + banner; corrupt values reset (FR-U-3) |
+| `localStorage` blocked or corrupt | In-memory fallback + one-time console warning; corrupt values reset (FR-U-3, FR-U-4) |
 | Stored ID missing from the API | Shown as "No longer available" with remove |
 | Request aborted (unmount / StrictMode) | Ignored silently |
 
