@@ -105,8 +105,8 @@ Test files live in `tests/`, named after the unit (e.g. `tests/leaf.test.ts`). "
 - **Done when:** tests green. The fade of `done` is CSS only.
 
 #### T11 · Breed list provider · `task/11-breeds-provider`
-- **Scope:** `src/features/breeds/BreedsProvider.tsx` and the `useBreeds()` hook: loads the list once on mount, exposes `{ status, leaves, index, retry }`, aborts on unmount, ignores the StrictMode double run, notifies on failure (architecture 6.2, FR-M-4).
-- **Tests (red first):** (1) starts in `loading`, then `done` with 165 leaves; (2) a network failure gives `failed` and triggers the red pop-up; (3) `retry` after a failure reaches `done`; (4) only one request is made under StrictMode.
+- **Scope:** `src/features/breeds/BreedsProvider.tsx` and the `useBreeds()` hook: loads the list once on mount, exposes `{ status, leaves, index, retry }`, aborts on unmount, ignores an aborted request (as in the StrictMode double run), notifies on failure (architecture 6.2, FR-M-4).
+- **Tests (red first):** (1) starts in `loading`, then `done` with 165 leaves; (2) a network failure gives `failed` and triggers the red pop-up; (3) `retry` after a failure reaches `done`; (4) under StrictMode the aborted first request causes no error and no pop-up, and the list still loads.
 - **Done when:** tests green.
 
 #### T12 · Random image hook · `task/12-use-breed-image`
