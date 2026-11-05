@@ -15,7 +15,7 @@ export default defineConfig({
         test: {
           name: 'unit',
           include: ['tests/**/*.test.{ts,tsx}'],
-          exclude: ['tests/**/*.live.test.ts'],
+          exclude: ['tests/**/*.live.test.{ts,tsx}'],
         },
       },
       {
@@ -23,7 +23,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'live',
-          include: ['tests/**/*.live.test.ts'],
+          include: ['tests/**/*.live.test.{ts,tsx}'],
         },
       },
     ],

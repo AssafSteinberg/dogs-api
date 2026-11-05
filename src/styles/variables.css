@@ -8,4 +8,9 @@
   /* Red pop-up: white on this red has a contrast ratio above 7:1. */
   --color-error-bg: #b3261e;
   --color-error-text: #ffffff;
+
+  /* API call status icons (the text label always carries the meaning too). */
+  --color-status-loading: #5f6368;
+  --color-status-failed: var(--color-error-bg);
+  --color-status-done: #1e7a3c;
 }

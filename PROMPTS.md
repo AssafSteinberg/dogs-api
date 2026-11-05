@@ -176,3 +176,17 @@
 **13:43 · claude**
 
 > Accept the warnings, commit T09, push and merge
+
+## 2026-11-05
+
+**13:51 · claude**
+
+> yes
+
+**13:55 · claude**
+
+> create a live test for testing api status visibility. Add extra loading time if needed so we can actually see the loading phase
+
+**13:59 · claude**
+
+> Commit T10, push and merge. Continue to T11 after that

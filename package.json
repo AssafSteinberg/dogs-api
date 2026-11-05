@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "test": "vitest run --project unit",
     "test:ui": "vitest --ui --project unit",
-    "test:live": "vitest run --project live"
+    "test:live": "vitest run --project live --reporter=verbose"
   },
   "dependencies": {
     "react": "^19.3.1",
