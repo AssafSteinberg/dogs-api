@@ -66,3 +66,11 @@
 **11:55 · claude**
 
 > Yes, commit them
+
+**12:05 · claude**
+
+> Let's write tasks.md. These are general guidlines for writing tasks and implementing them. Keep stages concise and in edible size (a function\component\feature). Work in Red->Green order - first write the task's tests (a few), see it is indeed red (not passing) then implement the feature and re-test to get green. Moving from one task to the next will require all test up to that stage to pass, unless permitted otherwise explicitly by me. Each task will have its own feature branch. *Request permission before commiting*. *No merging without explicit permission*. We stop after each task and will merge one task branch at a time. I do it manually or you do it when I order. Obey architecture and PRD strictly, don't make new things up on the fly - don't add new features, more dependencies or technologies (libraries or external services) under any implementation constraint. We will start implementing only when we have a final, approved, tasks.md file.
+
+**12:20 · claude**
+
+> You can commit this version. I want to get rid of the profile feature all together, remove it from the PRD, Architecture and tasks. The user will simply have all features but they will not be kept in the context of a specific profile (with others available).
