@@ -128,3 +128,17 @@
 **13:02 · claude**
 
 > Read the code and understood, looks good. Commit T04, then push and merge
+
+## 2026-11-05
+
+**13:03 · claude**
+
+> yes, start T05
+
+**13:07 · claude**
+
+> Before commiting - Add a test that actually uses the API now with real data. Show me the test and that it passes.
+
+**13:09 · claude**
+
+> Great idea, you got me, split into npm run test:live. Then you are allowed to commit, merge and continue
