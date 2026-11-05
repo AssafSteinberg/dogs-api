@@ -40,3 +40,31 @@ export function leafName(leaf: Leaf): string {
 export function leafTag(leaf: Leaf): string | null {
   return leaf.sub === null ? null : capitalise(leaf.breed)
 }
+
+export interface FlattenedBreeds {
+  /** Every leaf, ordered by breed, then sub-breed. */
+  leaves: Leaf[]
+  /** Lookup by id; has no entry for a breed that has sub-breeds. */
+  index: Map<LeafId, Leaf>
+}
+
+/** Turns the API's breed -> sub-breeds record into the flat list of leaves. */
+export function flattenBreeds(record: Readonly<Record<string, readonly string[]>>): FlattenedBreeds {
+  const leaves: Leaf[] = []
+  for (const breed of Object.keys(record).sort(compareNames)) {
+    const subs = [...(record[breed] ?? [])].sort(compareNames)
+    if (subs.length === 0) {
+      leaves.push({ id: toLeafId(breed, null), breed, sub: null })
+    } else {
+      for (const sub of subs) {
+        leaves.push({ id: toLeafId(breed, sub), breed, sub })
+      }
+    }
+  }
+  const index = new Map(leaves.map((leaf) => [leaf.id, leaf]))
+  return { leaves, index }
+}
+
+function compareNames(a: string, b: string): number {
+  return a.localeCompare(b)
+}
