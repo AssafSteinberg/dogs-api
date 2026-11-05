@@ -246,3 +246,9 @@
 **14:44 · claude**
 
 > Yes checked it visually and seams to work flawlessly, commit, push, merge, then start T15
+
+## 2026-11-05
+
+**14:50 · claude**
+
+> Commit, push, merge. Since I feel pretty confident about the next features,start T16 through T19 according to the guidelines we set (test, branched work). Ask for approval of milestone 0.3 when done (If all tests pass, I'll do a visual integration test).
