@@ -14,6 +14,11 @@
   --color-status-failed: var(--color-error-bg);
   --color-status-done: #1e7a3c;
 
+  /* Breed list */
+  --color-tag-bg: #e3e0ef;
+  --color-tag-text: #2b2750;
+  --color-marker: #c2185b;
+
   /* Page frame */
   --sidebar-width: 14rem;
   --sidebar-rail-width: 4rem;
