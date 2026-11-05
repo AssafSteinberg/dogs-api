@@ -45,9 +45,16 @@ export const BreedItem = memo(function BreedItem({
         onClick={() => onToggle(id)}
       >
         <span className={styles.name}>{leafName(leaf)}</span>
-        {tag !== null && <Tag>{tag}</Tag>}
+        {/* The spaces keep the button's accessible name readable: "Afghan Hound", not "AfghanHound". */}
+        {tag !== null && (
+          <>
+            {' '}
+            <Tag>{tag}</Tag>
+          </>
+        )}
         {wishlisted && (
           <span className={styles.marker}>
+            {' '}
             <svg viewBox="0 0 20 20" className={styles.heart} aria-hidden="true" focusable="false">
               <path d="M10 17s-6.5-4-6.5-8.6A3.4 3.4 0 0 1 10 6.8a3.4 3.4 0 0 1 6.5 1.6C16.5 13 10 17 10 17z" />
             </svg>
