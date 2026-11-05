@@ -177,7 +177,8 @@ describe('useBreedImage: outage pop-up (FR-D-9)', () => {
     const { result } = renderHook(() => ({ a: useBreedImage(down), b: useBreedImage(up) }), { wrapper })
 
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent(API_OUTAGE_MESSAGE))
-    expect(result.current.a.status).toBe('failed')
+    // result.current is updated in an effect after the DOM commit, so wait for it as well.
+    await waitFor(() => expect(result.current.a.status).toBe('failed'))
     await waitFor(() => expect(result.current.b.status).toBe('done'))
     await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument())
   })
