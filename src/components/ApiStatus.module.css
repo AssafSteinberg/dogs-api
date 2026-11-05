@@ -1,0 +1,59 @@
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+}
+
+.icon {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+}
+
+.label {
+  white-space: nowrap;
+}
+
+.status[data-status='loading'] .icon {
+  color: var(--color-status-loading);
+  animation: spin 1s linear infinite;
+}
+
+.status[data-status='failed'] .icon {
+  color: var(--color-status-failed);
+}
+
+.status[data-status='done'] .icon {
+  color: var(--color-status-done);
+}
+
+/* After about 2 s the "Done" text fades away and a quiet check mark remains.
+   The text stays in the page for assistive technology. */
+.status[data-status='done'] .label {
+  animation: fade-label 0.4s ease 2s forwards;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fade-label {
+  to {
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status[data-status='loading'] .icon {
+    animation: none;
+  }
+
+  .status[data-status='done'] .label {
+    animation: none;
+  }
+}
