@@ -2,8 +2,10 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { toLeafId, type LeafId } from '../../domain/leaf'
 import { useNotify } from '../../state/notifications'
+import '../../styles/variables.css'
 import { BreedList } from './BreedList'
 import { useBreeds } from './BreedsProvider'
+import styles from './BreedsPage.module.css'
 import { BreedsToolbar } from './BreedsToolbar'
 import { detailsId } from './detailsId'
 import { applyFilterAndSort, type SortDirection } from './listView'
@@ -98,9 +100,9 @@ export function BreedsPage() {
       />
 
       {status === 'failed' && (
-        <div>
-          <p>Couldn't load the list of breeds.</p>
-          <button type="button" onClick={retry}>
+        <div className={styles.failed}>
+          <p className={styles.message}>Couldn't load the list of breeds.</p>
+          <button type="button" className={styles.retry} onClick={retry}>
             Retry
           </button>
         </div>
