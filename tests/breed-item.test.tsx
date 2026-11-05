@@ -51,7 +51,8 @@ describe('BreedItem name and breed tag (FR-M-2)', () => {
     renderItem(afghan)
 
     const row = screen.getByRole('listitem')
-    expect(within(row).getByText('Afghan')).toBeInTheDocument()
+    // The full name, "Afghan Hound", and the unchanged breed tag, "Hound".
+    expect(within(row).getByText('Afghan Hound')).toBeInTheDocument()
     expect(within(row).getByText('Hound')).toBeInTheDocument()
   })
 

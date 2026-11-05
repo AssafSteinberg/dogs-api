@@ -252,3 +252,17 @@
 **14:50 · claude**
 
 > Commit, push, merge. Since I feel pretty confident about the next features,start T16 through T19 according to the guidelines we set (test, branched work). Ask for approval of milestone 0.3 when done (If all tests pass, I'll do a visual integration test).
+
+## 2026-11-05
+
+**15:19 · claude**
+
+> I want to change the name of a sub-breed in the master page to include the full name ("Blood" -> "Blood Hound"). Change only the appearance in the component, not the LeafId or any logic. Leave the breed tag as is. offer a fix and i'll approve it
+
+**15:24 · claude**
+
+> leave these seven odd names for now as is. Leave the double word for screen readers. change the details as well accordingly. Include docs update.
+
+**15:30 · claude**
+
+> Commit, push and merge both, then sync dev. I approve the 0.3 milestone]

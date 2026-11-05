@@ -56,7 +56,7 @@ describe('BreedDetails name and tag (FR-D-3)', () => {
     fetchMock.mockImplementation(async () => image('https://images.dog.ceo/a.jpg'))
     renderDetails(leaf('hound', 'afghan'))
 
-    expect(screen.getByRole('heading', { level: 2, name: /^Afghan/ })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Afghan Hound' })).toBeInTheDocument()
     expect(screen.getByText('Hound')).toBeInTheDocument()
     await screen.findByRole('img')
   })
@@ -79,7 +79,7 @@ describe('BreedDetails image (FR-D-2, FR-D-8)', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Loading…')
     const img = await screen.findByRole('img')
     expect(img).toHaveAttribute('src', 'https://images.dog.ceo/breeds/hound-basset/x.jpg')
-    expect(img).toHaveAccessibleName('Basset (hound)')
+    expect(img).toHaveAccessibleName('Basset Hound')
     expect(screen.getByRole('status')).toHaveTextContent('Done')
     expect(fetchMock.mock.calls[0]?.[0]).toBe('https://dog.ceo/api/breed/hound/basset/images/random')
   })
@@ -102,7 +102,7 @@ describe('BreedDetails image failure (FR-D-5)', () => {
       .mockImplementation(async () => image('https://images.dog.ceo/breeds/hound-blood/z.jpg'))
     renderDetails(leaf('hound', 'blood'))
 
-    expect(await screen.findByText("Couldn't load an image of Blood (hound)")).toBeInTheDocument()
+    expect(await screen.findByText("Couldn't load an image of Blood Hound")).toBeInTheDocument()
     expect(screen.getByRole('status')).toHaveTextContent('Failed')
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 
@@ -123,7 +123,7 @@ describe('BreedDetails image failure (FR-D-5)', () => {
     fetchMock.mockRejectedValue(new TypeError('Failed to fetch'))
     renderDetails(leaf('hound', 'walker'))
 
-    expect(await screen.findByText("Couldn't load an image of Walker (hound)")).toBeInTheDocument()
+    expect(await screen.findByText("Couldn't load an image of Walker Hound")).toBeInTheDocument()
     expect(await screen.findByRole('alert')).toHaveTextContent(API_OUTAGE_MESSAGE)
   })
 
@@ -137,7 +137,7 @@ describe('BreedDetails image failure (FR-D-5)', () => {
 
     fireEvent.error(img)
 
-    expect(await screen.findByText("Couldn't load an image of Plott (hound)")).toBeInTheDocument()
+    expect(await screen.findByText("Couldn't load an image of Plott Hound")).toBeInTheDocument()
     expect(screen.getByRole('status')).toHaveTextContent('Failed')
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
 
@@ -224,7 +224,7 @@ describe('details inside the Breeds page (acceptance 2)', () => {
   it('shows the details only for the expanded row', async () => {
     renderApp('/breeds/hound/ibizan')
 
-    const region = await screen.findByRole('region', { name: 'Ibizan (hound) details' })
+    const region = await screen.findByRole('region', { name: 'Ibizan Hound details' })
     expect(within(main()).getAllByRole('region')).toHaveLength(1)
     expect(await within(region).findByRole('img')).toBeInTheDocument()
   })
@@ -233,7 +233,7 @@ describe('details inside the Breeds page (acceptance 2)', () => {
     const user = userEvent.setup()
     // Its own leaf: hound/ibizan was already opened (and cached) by the previous test.
     renderApp('/breeds/spaniel/welsh')
-    const region = await screen.findByRole('region', { name: 'Welsh (spaniel) details' })
+    const region = await screen.findByRole('region', { name: 'Welsh Spaniel details' })
     const first = (await within(region).findByRole('img')).getAttribute('src')
     const imageRequests = () =>
       fetchMock.mock.calls.filter(([input]) => String(input).includes('/images/random')).length
@@ -243,7 +243,7 @@ describe('details inside the Breeds page (acceptance 2)', () => {
     expect(screen.queryByRole('region')).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /^Welsh\s*Spaniel/ }))
 
-    const again = await screen.findByRole('region', { name: 'Welsh (spaniel) details' })
+    const again = await screen.findByRole('region', { name: 'Welsh Spaniel details' })
     await waitFor(() => expect(within(again).getByRole('img')).toHaveAttribute('src', first ?? ''))
     expect(imageRequests()).toBe(1)
   })
