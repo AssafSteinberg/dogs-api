@@ -151,7 +151,7 @@ Limitations that shape the product:
 | 6 | The API is community-run with no SLA and may change or be unavailable | Defensive parsing, error states, `localStorage` holds IDs only |
 | 7 | `localStorage` can be cleared by the user or blocked in private browsing | Recover gracefully (FR-U-3), log a console warning (FR-U-4) |
 | 8 | The production host is not chosen and must rewrite unknown paths to `index.html` | Decide before the first deployment milestone |
-| 9 | Pressing Back from an item page may return to the top of the long list instead of the previous scroll position | Not handled: restoring it would be an addition. Checked in the browser during verification (T26) and reported |
+| 9 | Pressing Back from an item page may return to the top of the long list instead of the previous scroll position | **Resolved by checking:** nothing is done in code (restoring it would be an addition), and in real Chrome (T26) Back returns the list to exactly the same scroll position (6313 px before and after) |
 
 ## 9. Next steps
 1. Review and approve this PRD together with `architecture.md`.
