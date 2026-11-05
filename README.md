@@ -16,7 +16,7 @@ Built with React, Vite and strict TypeScript. All data comes from the free [Dog 
 | My Pack | `/pack` | The dogs you added, with how many of each. |
 | Wishlist | `/wishlist` | The breeds you want. |
 
-Pages are reached through links in a collapsible sidebar. The app is one page and all navigation is tracked by the URL (`/breeds/hound/afghan`), so every view can be bookmarked or shared.
+Pages are reached through links in a collapsible sidebar. All navigation is tracked by the URL (`/breeds/hound/afghan`), so every view can be bookmarked or shared.
 
 **Project documents.** For educational purposes, the app was designed and built from these, which are kept in the repository:
 
@@ -28,7 +28,6 @@ Pages are reached through links in a collapsible sidebar. The app is one page an
 
 - **Complete breed list.** 165 different breeds and sub-breeds. A sub-breed is shown by its full name ("Blood Hound") with a small tag for its breed ("Hound"); a breed without sub-breeds has no tag.
 - **Details in place.** Click an element to expand it: a random photo from the Dog CEO API, plus **Add to Pack** and **Add to Wishlist**. One element is open at a time. Re-opening it shows the same photo.
-- **The URL is the state.** `/breeds/hound/afghan` opens that element; reloading, sharing the link and the browser's back and forward buttons all work.
 - **Filter and sort.** Filter by breed or sub-breed name and sort A→Z or Z→A. Both are kept in the URL (`?q=hound&sort=desc`).
 - **Pack.** Add the same dog as many times as you like; the Pack page shows one row per dog with a count and lets you remove them one at a time.
 - **Wishlist.** Each breed can be on the list once. Remove entries from the Wishlist page.
