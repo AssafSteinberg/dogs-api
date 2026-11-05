@@ -81,7 +81,7 @@ Test files live in `tests/`, named after the unit (e.g. `tests/leaf.test.ts`). "
 - **Done when:** tests green.
 
 #### T07 · Safe storage · `task/07-storage`
-- **Scope:** `src/state/storage.ts`: versioned read/write of the keys in architecture 7.1, guards for stored data, `try/catch` everywhere, and an `isStorageAvailable()` check.
+- **Scope:** `src/state/storage.ts`: versioned read/write of the keys in architecture 7.1, guards for stored data, `try/catch` everywhere.
 - **Tests (red first):** (1) write then read returns the same collection data; (2) corrupt JSON returns the empty default; (3) a wrong schema version returns the empty default; (4) a throwing `localStorage` (read and write) does not throw and reports unavailable; (5) stored pack counts that are not positive integers are discarded.
 - **Done when:** tests green; this is the only module that touches `localStorage`.
 
