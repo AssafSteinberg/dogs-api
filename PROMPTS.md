@@ -312,3 +312,13 @@
 **20:49 · claude**
 
 > commit and merge with dev
+
+## 2026-11-05
+
+**22:03 · claude**
+
+> push
+
+**22:04 · claude**
+
+> merge dev into main and tag v1.1, don't forget prompts too
