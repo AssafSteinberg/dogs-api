@@ -162,7 +162,7 @@ A toolbar above the list (`BreedsToolbar`) has a **filter text box** and a **sor
 - On failure it calls `notify` (6.5) in addition to showing the inline error with Retry.
 
 ### 6.3 Random image (`useBreedImage`)
-- A module-level `Map<LeafId, string>` holds resolved URLs for the session; a second `Map<LeafId, Promise<string>>` de-duplicates in-flight requests (the stored value is the promise returned by the `async` fetch function, which is awaited by every caller). Together they satisfy FR-D-4: the first expand fetches, later expands reuse the same image, and a double effect run does not fetch twice.
+- A module-level `Map<LeafId, string>` holds resolved URLs for the session. This satisfies FR-D-4: the first expand fetches, and later expands of the same leaf reuse the same image without another request. There is no separate in-flight map: under React StrictMode (development) the effect runs twice, so the first request is aborted and ignored, as in the breed list (6.2).
 - Hook state: `{ status: 'loading' | 'failed' | 'done', url, retry }`. A failed fetch is *not* cached, so retry makes a new request (FR-D-5).
 - The cache is intentionally in memory only: a page reload gives a new random image, and no image data is ever stored (FR-U-2).
 - **Failure messages name the breed.** Both failure paths, the API request failing and the `<img>` `onError` (the URL resolved but the file would not load), show the same message built from the display name: `Couldn't load an image of Afghan (hound)` for a sub-breed, or `Couldn't load an image of Akita` for a breed without sub-breeds, with a Retry button. The `<img>` `alt` text uses the same name.
