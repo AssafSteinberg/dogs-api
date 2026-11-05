@@ -4,6 +4,7 @@ import { BreedsPage } from '../features/breeds/BreedsPage'
 import { BreedsProvider } from '../features/breeds/BreedsProvider'
 import { PackPage } from '../features/pack/PackPage'
 import { WishlistPage } from '../features/wishlist/WishlistPage'
+import { CollectionProvider } from '../state/collection'
 import { NotificationsProvider } from '../state/notifications'
 import { AppLayout } from './AppLayout'
 
@@ -12,16 +13,18 @@ export function App() {
   return (
     <NotificationsProvider>
       <BreedsProvider>
-        <Routes>
-          <Route element={<AppLayout />}>
-            <Route index element={<Navigate to="/breeds" replace />} />
-            {/* One route for /breeds, /breeds/:breed and /breeds/:breed/:sub, so the list stays mounted. */}
-            <Route path="breeds/:breed?/:sub?" element={<BreedsPage />} />
-            <Route path="pack" element={<PackPage />} />
-            <Route path="wishlist" element={<WishlistPage />} />
-            <Route path="*" element={<Navigate to="/breeds" replace />} />
-          </Route>
-        </Routes>
+        <CollectionProvider>
+          <Routes>
+            <Route element={<AppLayout />}>
+              <Route index element={<Navigate to="/breeds" replace />} />
+              {/* One route for /breeds, /breeds/:breed and /breeds/:breed/:sub, so the list stays mounted. */}
+              <Route path="breeds/:breed?/:sub?" element={<BreedsPage />} />
+              <Route path="pack" element={<PackPage />} />
+              <Route path="wishlist" element={<WishlistPage />} />
+              <Route path="*" element={<Navigate to="/breeds" replace />} />
+            </Route>
+          </Routes>
+        </CollectionProvider>
       </BreedsProvider>
       <Toast />
     </NotificationsProvider>
