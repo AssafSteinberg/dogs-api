@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router'
 import { Toast } from '../components/Toast'
+import { BreedPage } from '../features/breeds/BreedPage'
 import { BreedsPage } from '../features/breeds/BreedsPage'
 import { BreedsProvider } from '../features/breeds/BreedsProvider'
 import { PackPage } from '../features/pack/PackPage'
@@ -17,8 +18,9 @@ export function App() {
           <Routes>
             <Route element={<AppLayout />}>
               <Route index element={<Navigate to="/breeds" replace />} />
-              {/* One route for /breeds, /breeds/:breed and /breeds/:breed/:sub, so the list stays mounted. */}
-              <Route path="breeds/:breed?/:sub?" element={<BreedsPage />} />
+              <Route path="breeds" element={<BreedsPage />} />
+              {/* An element's own page: /breeds/:breed (no sub-breeds) or /breeds/:breed/:sub. Not in the sidebar. */}
+              <Route path="breeds/:breed/:sub?" element={<BreedPage />} />
               <Route path="pack" element={<PackPage />} />
               <Route path="wishlist" element={<WishlistPage />} />
               <Route path="*" element={<Navigate to="/breeds" replace />} />

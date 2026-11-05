@@ -1,40 +1,24 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
-import { MemoryRouter, useLocation, useNavigate } from 'react-router'
+import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { App } from '../src/app/App'
 import { API_OUTAGE_MESSAGE } from '../src/api/errors'
 import breedsFixture from './fixtures/breeds-list-all.json'
 
-// Counts renders of Tag (rendered by every sub-breed row), and marks each tag for counting.
-const tagRenders = vi.hoisted(() => ({ count: 0 }))
+// Marks every tag so the 99 tagged rows can be counted.
 vi.mock('../src/components/Tag', async () => {
   const { createElement } = await import('react')
   return {
-    Tag: ({ children }: { children: ReactNode }) => {
-      tagRenders.count += 1
-      return createElement('span', { 'data-testid': 'tag' }, children)
-    },
+    Tag: ({ children }: { children: ReactNode }) => createElement('span', { 'data-testid': 'tag' }, children),
   }
 })
-
-function LocationProbe() {
-  const { pathname, search } = useLocation()
-  return <p data-testid="url">{pathname + search}</p>
-}
-
-function BackButton() {
-  const navigate = useNavigate()
-  return <button onClick={() => navigate(-1)}>browser back</button>
-}
 
 function renderAt(url: string) {
   return render(
     <MemoryRouter initialEntries={[url]}>
       <App />
-      <LocationProbe />
-      <BackButton />
     </MemoryRouter>,
   )
 }
@@ -46,7 +30,7 @@ function json(body: unknown): Response {
   })
 }
 
-/** The list for /breeds/list/all, and a picture for the image request of any expanded row. */
+/** The list for /breeds/list/all, and a picture for any image request. */
 async function respond(input: Parameters<typeof fetch>[0]): Promise<Response> {
   if (String(input).endsWith('/breeds/list/all')) return json(breedsFixture)
   return json({ status: 'success', message: 'https://images.dog.ceo/breeds/test/shot.jpg' })
@@ -67,10 +51,8 @@ afterEach(() => {
 })
 
 const main = () => screen.getByRole('main')
-const url = () => screen.getByTestId('url')
 const rows = () => within(main()).getAllByRole('listitem')
 const row = (name: RegExp) => within(main()).getByRole('button', { name })
-const expandedButtons = () => within(main()).queryAllByRole('button', { expanded: true })
 
 async function listLoaded() {
   await waitFor(() => expect(within(main()).getAllByRole('listitem').length).toBeGreaterThan(0))
@@ -86,7 +68,6 @@ describe('the list (FR-M-1, FR-M-2, FR-M-4)', () => {
     expect(rows()).toHaveLength(165)
     expect(within(main()).getAllByTestId('tag')).toHaveLength(99)
     expect(within(main()).getByRole('heading', { level: 1, name: 'Breeds' })).toBeInTheDocument()
-    expect(expandedButtons()).toHaveLength(0)
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
@@ -112,154 +93,14 @@ describe('the list (FR-M-1, FR-M-2, FR-M-4)', () => {
     expect(rows()).toHaveLength(165)
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
-})
 
-describe('expanding changes the URL (FR-D-1, FR-D-1a)', () => {
-  it('expands a sub-breed to /breeds/hound/afghan and collapses back to /breeds', async () => {
-    const user = userEvent.setup()
+  it('is only the list: opening /breeds shows no item page and requests no image', async () => {
     renderAt('/breeds')
     await listLoaded()
 
-    await user.click(row(/^Afghan\s*Hound/))
-    expect(url()).toHaveTextContent('/breeds/hound/afghan')
-    expect(row(/^Afghan\s*Hound/)).toHaveAttribute('aria-expanded', 'true')
-    expect(expandedButtons()).toHaveLength(1)
-
-    await user.click(row(/^Afghan\s*Hound/))
-    expect(url()).toHaveTextContent(/^\/breeds$/)
-    expect(expandedButtons()).toHaveLength(0)
-  })
-
-  it('expands a breed without sub-breeds to /breeds/akita', async () => {
-    const user = userEvent.setup()
-    renderAt('/breeds')
-    await listLoaded()
-
-    await user.click(row(/^Akita$/))
-
-    expect(url()).toHaveTextContent('/breeds/akita')
-    expect(row(/^Akita$/)).toHaveAttribute('aria-expanded', 'true')
-  })
-
-  it('has only one row expanded: expanding another collapses the first (FR-D-6)', async () => {
-    const user = userEvent.setup()
-    renderAt('/breeds')
-    await listLoaded()
-
-    await user.click(row(/^Afghan\s*Hound/))
-    await user.click(row(/^Akita$/))
-
-    expect(url()).toHaveTextContent('/breeds/akita')
-    expect(expandedButtons()).toHaveLength(1)
-    expect(row(/^Afghan\s*Hound/)).toHaveAttribute('aria-expanded', 'false')
-  })
-
-  it('moves between expansion states with browser back (acceptance 3)', async () => {
-    const user = userEvent.setup()
-    renderAt('/breeds')
-    await listLoaded()
-    await user.click(row(/^Afghan\s*Hound/))
-    await user.click(row(/^Akita$/))
-
-    await user.click(screen.getByRole('button', { name: 'browser back' }))
-    expect(url()).toHaveTextContent('/breeds/hound/afghan')
-    expect(row(/^Afghan\s*Hound/)).toHaveAttribute('aria-expanded', 'true')
-
-    await user.click(screen.getByRole('button', { name: 'browser back' }))
-    expect(url()).toHaveTextContent(/^\/breeds$/)
-    expect(expandedButtons()).toHaveLength(0)
-  })
-
-  it('keeps the query string when expanding and collapsing', async () => {
-    const user = userEvent.setup()
-    renderAt('/breeds?q=ha&sort=desc')
-    await listLoaded()
-
-    await user.click(row(/^Afghan\s*Hound/))
-    expect(url()).toHaveTextContent('/breeds/hound/afghan?q=ha&sort=desc')
-
-    await user.click(row(/^Afghan\s*Hound/))
-    expect(url()).toHaveTextContent('/breeds?q=ha&sort=desc')
-  })
-})
-
-describe('opening a URL directly (FR-D-1a)', () => {
-  it('shows that sub-breed expanded and no other row', async () => {
-    renderAt('/breeds/hound/afghan')
-    await listLoaded()
-
-    expect(row(/^Afghan\s*Hound/)).toHaveAttribute('aria-expanded', 'true')
-    expect(expandedButtons()).toHaveLength(1)
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-  })
-
-  it('shows a breed without sub-breeds expanded', async () => {
-    renderAt('/breeds/akita')
-    await listLoaded()
-
-    expect(row(/^Akita$/)).toHaveAttribute('aria-expanded', 'true')
-    expect(expandedButtons()).toHaveLength(1)
-  })
-
-  it('scrolls the expanded row into view, on a deep link and on a click', async () => {
-    const scroll = vi.spyOn(Element.prototype, 'scrollIntoView')
-    const user = userEvent.setup()
-    renderAt('/breeds/hound/afghan')
-    await listLoaded()
-
-    await waitFor(() => expect(scroll).toHaveBeenCalled())
-    expect(scroll.mock.contexts.at(-1)).toHaveTextContent('Afghan')
-
-    scroll.mockClear()
-    await user.click(row(/^Akita$/))
-
-    await waitFor(() => expect(scroll).toHaveBeenCalled())
-    expect(scroll.mock.contexts.at(-1)).toHaveTextContent('Akita')
-  })
-})
-
-describe('an element that does not exist (FR-D-1b)', () => {
-  it.each([
-    ['/breeds/hound/nothing', '"hound/nothing" was not found'],
-    ['/breeds/hound', '"hound" was not found'],
-    ['/breeds/nosuchbreed', '"nosuchbreed" was not found'],
-  ])('%s shows the collapsed list and a pop-up naming it', async (path, message) => {
-    renderAt(path)
-    await listLoaded()
-
-    expect(rows()).toHaveLength(165)
-    expect(expandedButtons()).toHaveLength(0)
-    // The pop-up is raised in an effect just after the list renders, so wait for it.
-    expect(await screen.findByRole('alert')).toHaveTextContent(message)
-  })
-
-  it('removes the pop-up when the URL changes', async () => {
-    const user = userEvent.setup()
-    renderAt('/breeds/hound/nothing')
-    await listLoaded()
-    expect(await screen.findByRole('alert')).toBeInTheDocument()
-
-    await user.click(row(/^Akita$/))
-
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-    expect(row(/^Akita$/)).toHaveAttribute('aria-expanded', 'true')
-  })
-
-  it('removes the pop-up when leaving the page', async () => {
-    const user = userEvent.setup()
-    renderAt('/breeds/hound/nothing')
-    await listLoaded()
-    await screen.findByRole('alert')
-
-    await user.click(screen.getByRole('link', { name: 'My Pack' }))
-
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-  })
-
-  it('does not report a missing element while the list is still loading', () => {
-    renderAt('/breeds/hound/afghan')
-
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(within(main()).queryByRole('region')).not.toBeInTheDocument()
+    const imageRequests = fetchMock.mock.calls.filter(([input]) => String(input).includes('/images/random'))
+    expect(imageRequests).toHaveLength(0)
   })
 })
 
@@ -274,20 +115,5 @@ describe('the Wishlist marker (FR-W-4)', () => {
 
     expect(within(main()).getAllByText('On wishlist')).toHaveLength(2)
     expect(row(/^Akita\s*On wishlist/)).toBeInTheDocument()
-  })
-})
-
-describe('performance (architecture 8)', () => {
-  it('re-renders only the rows involved when a row is expanded, not all 165', async () => {
-    const user = userEvent.setup()
-    renderAt('/breeds')
-    await listLoaded()
-    const before = tagRenders.count
-
-    await user.click(row(/^Afghan\s*Hound/))
-
-    // Tag renders once per re-rendered sub-breed row, and the open details render it a few times
-    // too (first the name, then again when the image has loaded). The point: a handful, not 99.
-    expect(tagRenders.count - before).toBeLessThanOrEqual(4)
   })
 })

@@ -6,7 +6,6 @@ import { leafFullName, leafTag, type Leaf } from '../../domain/leaf'
 import { usePack, useWishlist } from '../../state/collection'
 import '../../styles/variables.css'
 import styles from './BreedDetails.module.css'
-import { detailsId } from './detailsId'
 import { useBreedImage } from './useBreedImage'
 
 /**
@@ -35,9 +34,9 @@ export function BreedDetails({ leaf }: { leaf: Leaf }) {
   }
 
   return (
-    <section id={detailsId(leaf.id)} className={styles.details} aria-label={`${name} details`}>
+    <section className={styles.details} aria-label={`${name} details`}>
       <div className={styles.heading}>
-        <h2 className={styles.title}>{name}</h2>
+        <h1 className={styles.title}>{name}</h1>
         {tag !== null && <Tag>{tag}</Tag>}
       </div>
 
