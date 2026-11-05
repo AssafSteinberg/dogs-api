@@ -106,3 +106,67 @@
 **12:46 · claude**
 
 > commit tasks.md and prompts to master. Then proceed with the merging of master into dev as proposed to keep in sync.
+
+## 2026-11-05
+
+**12:48 · claude**
+
+> Yes, start T03
+
+**12:53 · claude**
+
+> Commit T03 but don't mergre or push yet
+
+**12:56 · claude**
+
+> you can push and merge. From now on, track PROMPTS with the dev and commit it together too.
+
+**12:58 · claude**
+
+> yes
+
+**13:02 · claude**
+
+> Read the code and understood, looks good. Commit T04, then push and merge
+
+## 2026-11-05
+
+**13:03 · claude**
+
+> yes, start T05
+
+**13:07 · claude**
+
+> Before commiting - Add a test that actually uses the API now with real data. Show me the test and that it passes.
+
+**13:09 · claude**
+
+> Great idea, you got me, split into npm run test:live. Then you are allowed to commit, merge and continue
+
+## 2026-11-05
+
+**13:15 · claude**
+
+> Read the code, approved. Commit T06, then push and merge
+
+## 2026-11-05
+
+**13:15 · claude**
+
+> yes, start T07
+
+**13:22 · claude**
+
+> Read the code, Decisions approved. You can go on.
+
+## 2026-11-05
+
+**13:31 · claude**
+
+> Yes, gone over it and learned some new unpacking js magic too.. commit, push, and merge
+
+## 2026-11-05
+
+**13:36 · claude**
+
+> Since all tests are green and we have only logic here that I've done a CR to, you can merge dev into main, then start T09

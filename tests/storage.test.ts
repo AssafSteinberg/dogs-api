@@ -1,0 +1,143 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { toLeafId } from '../src/domain/leaf'
+import {
+  emptyCollection,
+  isStorageAvailable,
+  loadCollection,
+  saveCollection,
+} from '../src/state/storage'
+
+const KEY = 'dogs-api:v1:collection'
+
+const afghan = toLeafId('hound', 'afghan')
+const akita = toLeafId('akita', null)
+
+beforeEach(() => {
+  localStorage.clear()
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
+describe('saving and loading', () => {
+  it('returns the empty collection when nothing is stored', () => {
+    expect(loadCollection()).toEqual({ pack: {}, wishlist: [] })
+    expect(loadCollection()).toEqual(emptyCollection())
+  })
+
+  it('returns what was saved', () => {
+    const collection = { pack: { [afghan]: 3, [akita]: 1 }, wishlist: [akita, afghan] }
+
+    saveCollection(collection)
+
+    expect(loadCollection()).toEqual(collection)
+  })
+
+  it('stores only ids and counts under the versioned key (FR-U-2)', () => {
+    saveCollection({ pack: { [afghan]: 2 }, wishlist: [akita] })
+
+    const raw = localStorage.getItem(KEY)
+    expect(raw).not.toBeNull()
+    expect(JSON.parse(raw ?? '')).toEqual({ pack: { 'hound/afghan': 2 }, wishlist: ['akita'] })
+  })
+})
+
+describe('unreadable data is replaced with the empty collection (FR-U-3)', () => {
+  it.each(['{not json', '"text"', 'null', '[]', '42'])('corrupt or non-object JSON %s', (raw) => {
+    localStorage.setItem(KEY, raw)
+
+    expect(loadCollection()).toEqual(emptyCollection())
+  })
+
+  it('ignores data stored under a different schema version', () => {
+    localStorage.setItem(
+      'dogs-api:v2:collection',
+      JSON.stringify({ pack: { akita: 1 }, wishlist: ['akita'] }),
+    )
+
+    expect(loadCollection()).toEqual(emptyCollection())
+  })
+
+  it.each([
+    ['a missing pack', { wishlist: ['akita'] }],
+    ['a missing wishlist', { pack: { akita: 1 } }],
+    ['a pack that is an array', { pack: [], wishlist: [] }],
+    ['a wishlist that is an object', { pack: {}, wishlist: {} }],
+  ])('data with %s', (_label, payload) => {
+    localStorage.setItem(KEY, JSON.stringify(payload))
+
+    expect(loadCollection()).toEqual(emptyCollection())
+  })
+})
+
+describe('invalid entries are discarded, valid ones kept', () => {
+  it('drops pack counts that are not positive integers', () => {
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({
+        pack: {
+          'hound/afghan': 2,
+          akita: 0,
+          'hound/basset': -1,
+          'terrier/norfolk': 1.5,
+          'bulldog/french': '3',
+          'poodle/toy': null,
+        },
+        wishlist: [],
+      }),
+    )
+
+    expect(loadCollection()).toEqual({ pack: { 'hound/afghan': 2 }, wishlist: [] })
+  })
+
+  it('drops malformed ids and non-string wishlist items, and removes duplicates', () => {
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({
+        pack: { 'a/b/c': 1, akita: 1 },
+        wishlist: ['akita', 'akita', 'hound/afghan', 7, 'bad id', ''],
+      }),
+    )
+
+    expect(loadCollection()).toEqual({ pack: { akita: 1 }, wishlist: ['akita', 'hound/afghan'] })
+  })
+
+  it('keeps well-formed ids the API may no longer list (shown as unavailable later)', () => {
+    localStorage.setItem(KEY, JSON.stringify({ pack: {}, wishlist: ['hound/retired'] }))
+
+    expect(loadCollection().wishlist).toEqual(['hound/retired'])
+  })
+})
+
+describe('when storage is blocked or broken (FR-U-4)', () => {
+  it('does not throw on read or write, and reports unavailable', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new DOMException('denied', 'SecurityError')
+    })
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('quota', 'QuotaExceededError')
+    })
+
+    expect(loadCollection()).toEqual(emptyCollection())
+    expect(() => saveCollection({ pack: { [akita]: 1 }, wishlist: [] })).not.toThrow()
+    expect(isStorageAvailable()).toBe(false)
+  })
+
+  it('copes with window.localStorage itself throwing', () => {
+    vi.spyOn(window, 'localStorage', 'get').mockImplementation(() => {
+      throw new DOMException('denied', 'SecurityError')
+    })
+
+    expect(loadCollection()).toEqual(emptyCollection())
+    expect(() => saveCollection(emptyCollection())).not.toThrow()
+    expect(isStorageAvailable()).toBe(false)
+  })
+})
+
+describe('isStorageAvailable', () => {
+  it('is true for working storage and leaves nothing behind', () => {
+    expect(isStorageAvailable()).toBe(true)
+    expect(localStorage.length).toBe(0)
+  })
+})
