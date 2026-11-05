@@ -170,3 +170,99 @@
 **13:36 · claude**
 
 > Since all tests are green and we have only logic here that I've done a CR to, you can merge dev into main, then start T09
+
+## 2026-11-05
+
+**13:43 · claude**
+
+> Accept the warnings, commit T09, push and merge
+
+## 2026-11-05
+
+**13:51 · claude**
+
+> yes
+
+**13:55 · claude**
+
+> create a live test for testing api status visibility. Add extra loading time if needed so we can actually see the loading phase
+
+**13:59 · claude**
+
+> Commit T10, push and merge. Continue to T11 after that
+
+## 2026-11-05
+
+**14:09 · claude**
+
+> I don't understand the design decision, can you explain it?
+
+**14:11 · claude**
+
+> I prefer the simple version
+
+**14:14 · claude**
+
+> Commit T11, push and merge, then fix the tasks.md line and then fix tasks and architecture
+
+**14:14 · claude**
+
+> Commit T11, push and merge, then fix the tasks.md line
+
+## 2026-11-05
+
+**14:16 · claude**
+
+> for T12, remove test req
+
+**14:17 · claude**
+
+> for T12, remove test req (3) in tasks.md and commit the new tasks.md
+
+**14:18 · claude**
+
+> Yes, sync architecture, push main, sync dev, and start T12 and commit it too
+
+## 2026-11-05
+
+**14:24 · claude**
+
+> Create a live test for this feature. If it passes, continue according to plan
+
+## 2026-11-05
+
+**14:31 · claude**
+
+> yes, permitted to advance with everything requested.
+
+## 2026-11-05
+
+**14:37 · claude**
+
+> Yes, commit, push, merge, then start T14
+
+## 2026-11-05
+
+**14:44 · claude**
+
+> Yes checked it visually and seams to work flawlessly, commit, push, merge, then start T15
+
+## 2026-11-05
+
+**14:50 · claude**
+
+> Commit, push, merge. Since I feel pretty confident about the next features,start T16 through T19 according to the guidelines we set (test, branched work). Ask for approval of milestone 0.3 when done (If all tests pass, I'll do a visual integration test).
+
+## 2026-11-05
+
+**15:19 · claude**
+
+> I want to change the name of a sub-breed in the master page to include the full name ("Blood" -> "Blood Hound"). Change only the appearance in the component, not the LeafId or any logic. Leave the breed tag as is. offer a fix and i'll approve it
+
+**15:24 · claude**
+
+> leave these seven odd names for now as is. Leave the double word for screen readers. change the details as well accordingly. Include docs update.
+
+**15:30 · claude**
+
+> Commit, push and merge both, then sync dev. I approve the 0.3 milestone]

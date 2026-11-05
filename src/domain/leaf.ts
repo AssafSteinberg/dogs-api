@@ -36,6 +36,11 @@ export function leafName(leaf: Leaf): string {
   return capitalise(leaf.sub ?? leaf.breed)
 }
 
+/** Name as shown to people: "Blood Hound" for a sub-breed, "Akita" for a breed without sub-breeds. Display only. */
+export function leafFullName(leaf: Leaf): string {
+  return leaf.sub === null ? leafName(leaf) : `${leafName(leaf)} ${capitalise(leaf.breed)}`
+}
+
 /** Breed tag shown on sub-breed leaves only; null for a breed without sub-breeds. */
 export function leafTag(leaf: Leaf): string | null {
   return leaf.sub === null ? null : capitalise(leaf.breed)

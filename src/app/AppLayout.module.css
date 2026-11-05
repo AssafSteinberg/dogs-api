@@ -1,0 +1,19 @@
+/* The sidebar sets its own width (expanded or rail), so its column is "auto". */
+.layout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.main {
+  min-width: 0;
+  padding: var(--space-3);
+}
+
+/* Keep this breakpoint in sync with NARROW_QUERY in Sidebar.tsx. */
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+  }
+}
