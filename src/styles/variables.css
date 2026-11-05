@@ -16,6 +16,11 @@
 
   /* Page frame */
   --sidebar-width: 14rem;
+  --sidebar-rail-width: 4rem;
+  --bar-height: 3.5rem;
+  --z-backdrop: 800;
+  --z-drawer: 900;
+  --color-backdrop: rgb(0 0 0 / 0.4);
   --color-text: #1c1b1f;
   --color-bg: #ffffff;
   --color-sidebar-bg: #f4f3f6;
