@@ -145,7 +145,7 @@ Test files live in `tests/`, named after the unit (e.g. `tests/leaf.test.ts`). "
 
 #### T18 · Breed details · `task/18-breed-details`
 - **Scope:** `BreedDetails`: name, tag, image via `useBreedImage`, per-image `ApiStatus`, failure message naming the breed with Retry (for a failed request and for `<img>` `onError`), alt text, Add to Pack and Add to Wishlist buttons with the "On wishlist" state (architecture 6.3, 8; FR-D-2 to D-5, P-1, W-1).
-- **Tests (red first):** (1) expanding shows the image for the right leaf and the Done status; (2) collapsing and re-expanding shows the same image URL; (3) a failed request shows `Couldn't load an image of Afghan (hound)` and Retry, and `<img>` `onError` shows the same message; (4) Add to Pack twice makes the count 2; (5) Add to Wishlist flips to "On wishlist" and a second click does not duplicate it.
+- **Tests (red first):** (1) expanding shows the image for the right leaf and the Done status; (2) collapsing and re-expanding shows the same image URL; (3) a failed request shows `Couldn't load an image of Afghan Hound` and Retry, and `<img>` `onError` shows the same message; (4) Add to Pack twice makes the count 2; (5) Add to Wishlist flips to "On wishlist" and a second click does not duplicate it.
 - **Done when:** tests green.
 
 #### T19 · Sort and filter toolbar · `task/19-breeds-toolbar`
