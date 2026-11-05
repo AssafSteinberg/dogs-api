@@ -1,51 +1,33 @@
-import { memo, type ReactNode } from 'react'
+import { memo } from 'react'
+import { Link } from 'react-router'
 import { Tag } from '../../components/Tag'
 import { leafFullName, leafTag, type LeafId } from '../../domain/leaf'
 import '../../styles/variables.css'
 import styles from './BreedItem.module.css'
-import { detailsId } from './detailsId'
 
 interface BreedItemProps {
   id: LeafId
   breed: string
   sub: string | null
-  expanded: boolean
   /** The leaf is on the Wishlist (FR-W-4). */
   wishlisted: boolean
-  /** Called with this row's id when its toggle is activated. Keep it stable so the row can be memoised. */
-  onToggle: (id: LeafId) => void
-  /** The details, shown below the toggle while the row is expanded. */
-  children?: ReactNode
 }
 
 /**
- * One row of the master list: the name, the breed tag (sub-breeds only) and a toggle
- * that expands the details in place. Only primitive props plus a stable callback,
- * so a URL change re-renders two rows, not all of them (architecture 8).
+ * One row of the master list: a link to the element's own page, holding its full name,
+ * the breed tag (sub-breeds only) and the wishlist marker (FR-D-1, FR-M-2). The link carries
+ * no query string, so the filter and the order are not part of the item URL. Only primitive
+ * props, so rows whose props did not change are not re-rendered (architecture 8).
  */
-export const BreedItem = memo(function BreedItem({
-  id,
-  breed,
-  sub,
-  expanded,
-  wishlisted,
-  onToggle,
-  children,
-}: BreedItemProps) {
+export const BreedItem = memo(function BreedItem({ id, breed, sub, wishlisted }: BreedItemProps) {
   const leaf = { id, breed, sub }
   const tag = leafTag(leaf)
 
   return (
-    <li className={styles.row} data-expanded={expanded}>
-      <button
-        type="button"
-        className={styles.toggle}
-        aria-expanded={expanded}
-        aria-controls={detailsId(id)}
-        onClick={() => onToggle(id)}
-      >
+    <li className={styles.row}>
+      <Link to={`/breeds/${id}`} className={styles.link}>
         <span className={styles.name}>{leafFullName(leaf)}</span>
-        {/* The spaces keep the button's accessible name readable: "Afghan Hound", not "AfghanHound". */}
+        {/* The spaces keep the link's accessible name readable: "Afghan Hound", not "AfghanHound". */}
         {tag !== null && (
           <>
             {' '}
@@ -61,11 +43,7 @@ export const BreedItem = memo(function BreedItem({
             <span className={styles.visuallyHidden}>On wishlist</span>
           </span>
         )}
-        <svg viewBox="0 0 20 20" className={styles.chevron} aria-hidden="true" focusable="false">
-          <path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-      {children}
+      </Link>
     </li>
   )
 })

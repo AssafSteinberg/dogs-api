@@ -1,7 +1,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
-import { MemoryRouter } from 'react-router'
+import { MemoryRouter, useLocation, useNavigate } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { App } from '../src/app/App'
 import { API_OUTAGE_MESSAGE } from '../src/api/errors'
@@ -15,10 +15,22 @@ vi.mock('../src/components/Tag', async () => {
   }
 })
 
+function LocationProbe() {
+  const { pathname, search } = useLocation()
+  return <p data-testid="url">{pathname + search}</p>
+}
+
+function BackButton() {
+  const navigate = useNavigate()
+  return <button onClick={() => navigate(-1)}>browser back</button>
+}
+
 function renderAt(url: string) {
   return render(
     <MemoryRouter initialEntries={[url]}>
       <App />
+      <LocationProbe />
+      <BackButton />
     </MemoryRouter>,
   )
 }
@@ -52,7 +64,7 @@ afterEach(() => {
 
 const main = () => screen.getByRole('main')
 const rows = () => within(main()).getAllByRole('listitem')
-const row = (name: RegExp) => within(main()).getByRole('button', { name })
+const row = (name: RegExp) => within(main()).getByRole('link', { name })
 
 async function listLoaded() {
   await waitFor(() => expect(within(main()).getAllByRole('listitem').length).toBeGreaterThan(0))
@@ -92,6 +104,41 @@ describe('the list (FR-M-1, FR-M-2, FR-M-4)', () => {
     await listLoaded()
     expect(rows()).toHaveLength(165)
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('has a link on every row to its own page, with no query string and nothing that expands', async () => {
+    renderAt('/breeds?q=ha&sort=desc')
+    await listLoaded()
+
+    const links = within(main()).getAllByRole('link')
+    expect(links.length).toBeGreaterThan(0)
+    for (const link of links) {
+      const href = link.getAttribute('href') ?? ''
+      expect(href).toMatch(/^\/breeds\/[a-z-]+(\/[a-z-]+)?$/)
+    }
+    expect(within(main()).queryAllByRole('button', { expanded: true })).toHaveLength(0)
+    expect(main().querySelectorAll('[aria-expanded]')).toHaveLength(0)
+  })
+
+  it('goes from the filtered, sorted list to the plain item URL, and Back restores the list', async () => {
+    const user = userEvent.setup()
+    renderAt('/breeds?q=ha&sort=desc')
+    await listLoaded()
+    const before = rows().length
+    const first = within(main()).getAllByRole('link')[0] as HTMLElement
+    const href = first.getAttribute('href')
+
+    await user.click(first)
+
+    // The item URL is the plain path: the filter and the order are not carried along.
+    expect(screen.getByTestId('url').textContent).toBe(href)
+    await waitFor(() => expect(within(main()).queryByRole('list')).not.toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: 'browser back' }))
+
+    expect(screen.getByTestId('url').textContent).toBe('/breeds?q=ha&sort=desc')
+    await listLoaded()
+    expect(rows()).toHaveLength(before)
   })
 
   it('is only the list: opening /breeds shows no item page and requests no image', async () => {

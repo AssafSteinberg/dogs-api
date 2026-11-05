@@ -9,8 +9,8 @@ import styles from './BreedDetails.module.css'
 import { useBreedImage } from './useBreedImage'
 
 /**
- * The details of the expanded row (FR-D-2 to D-5): the name and breed tag, one random
- * image with its call status, and the Add to Pack and Wishlist actions.
+ * The content of an element's item page (FR-D-2 to D-5): the name as the page heading and the
+ * breed tag, one random image with its call status, and the Add to Pack and Wishlist actions.
  */
 export function BreedDetails({ leaf }: { leaf: Leaf }) {
   const image = useBreedImage(leaf)

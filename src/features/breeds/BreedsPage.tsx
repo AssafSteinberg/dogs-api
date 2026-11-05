@@ -1,6 +1,5 @@
-import { useCallback, useMemo } from 'react'
-import { useNavigate, useSearchParams } from 'react-router'
-import type { LeafId } from '../../domain/leaf'
+import { useMemo } from 'react'
+import { useSearchParams } from 'react-router'
 import '../../styles/variables.css'
 import { BreedList } from './BreedList'
 import { useBreeds } from './BreedsProvider'
@@ -10,21 +9,17 @@ import { applyFilterAndSort, type SortDirection } from './listView'
 
 /**
  * The master list page. The filter and the order live in the query string (architecture 5A):
- * /breeds?q=ha&sort=desc. Each row leads to its own item page.
+ * /breeds?q=ha&sort=desc. Each row is a link to its own item page; the filter and the order are not
+ * carried to it, and the browser's Back button returns to this list with both (FR-M-7).
  */
 export function BreedsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const navigate = useNavigate()
   const { status, leaves, retry } = useBreeds()
 
   const query = searchParams.get('q') ?? ''
   const sort: SortDirection = searchParams.get('sort') === 'desc' ? 'desc' : 'asc'
 
   const matches = useMemo(() => applyFilterAndSort(leaves, query, sort), [leaves, query, sort])
-
-  // Opens the element's own page. The filter and the order are not carried along: the browser's
-  // Back button returns to this list with both (FR-M-7).
-  const onToggle = useCallback((id: LeafId) => navigate(`/breeds/${id}`), [navigate])
 
   // The filter and the order live in the query string; the defaults are left out. Replacing
   // the entry keeps typing and toggling out of the browser history.
@@ -71,7 +66,7 @@ export function BreedsPage() {
         <p>No breeds match "{query.trim()}". Use Clear filter to see them all.</p>
       )}
 
-      {status === 'done' && <BreedList leaves={matches} onToggle={onToggle} />}
+      {status === 'done' && <BreedList leaves={matches} />}
     </>
   )
 }
