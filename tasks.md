@@ -110,8 +110,8 @@ Test files live in `tests/`, named after the unit (e.g. `tests/leaf.test.ts`). "
 - **Done when:** tests green.
 
 #### T12 · Random image hook · `task/12-use-breed-image`
-- **Scope:** `src/features/breeds/useBreedImage.ts`: session cache, in-flight de-duplication, `{ status, url, retry }`, failures not cached, notify on outage (architecture 6.3, FR-D-2, FR-D-4, FR-D-5).
-- **Tests (red first):** (1) the first use fetches and returns the URL; (2) a second use of the same leaf returns the same URL without another request; (3) two simultaneous uses make one request; (4) a failure gives `failed`, is not cached, and `retry` fetches again; (5) a 404 sets `failed` but raises no outage pop-up, while a network error does.
+- **Scope:** `src/features/breeds/useBreedImage.ts`: session cache, `{ status, url, retry }`, failures not cached, notify on outage (architecture 6.3, FR-D-2, FR-D-4, FR-D-5).
+- **Tests (red first):** (1) the first use fetches and returns the URL; (2) a second use of the same leaf returns the same URL without another request; (3) a failure gives `failed`, is not cached, and `retry` fetches again; (4) a 404 sets `failed` but raises no outage pop-up, while a network error does.
 - **Done when:** tests green.
 
 #### T13 · Routing and layout shell · `task/13-router-layout`
