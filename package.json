@@ -8,8 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "vitest run",
-    "test:ui": "vitest --ui"
+    "test": "vitest run --project unit",
+    "test:ui": "vitest --ui --project unit",
+    "test:live": "vitest run --project live"
   },
   "dependencies": {
     "react": "^19.3.1",
