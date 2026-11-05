@@ -106,3 +106,17 @@
 **12:46 · claude**
 
 > commit tasks.md and prompts to master. Then proceed with the merging of master into dev as proposed to keep in sync.
+
+## 2026-11-05
+
+**12:48 · claude**
+
+> Yes, start T03
+
+**12:53 · claude**
+
+> Commit T03 but don't mergre or push yet
+
+**12:56 · claude**
+
+> you can push and merge. From now on, track PROMPTS with the dev and commit it together too.
