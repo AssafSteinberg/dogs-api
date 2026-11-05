@@ -54,11 +54,11 @@ export function BreedsProvider({ children }: { children: ReactNode }) {
         if (controller.signal.aborted) return
         const { leaves, index } = flattenBreeds(record)
         setLoaded({ status: 'done', leaves, index })
-        clear('api')
+        clear()
       } catch (error) {
         if (controller.signal.aborted) return
         setLoaded(FAILED)
-        if (isApiOutage(error)) notify(API_OUTAGE_MESSAGE, 'api')
+        if (isApiOutage(error)) notify(API_OUTAGE_MESSAGE)
       }
     }
     void load()

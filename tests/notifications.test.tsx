@@ -2,25 +2,16 @@ import { act, render, renderHook, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { Toast } from '../src/components/Toast'
-import {
-  NotificationsProvider,
-  useNotify,
-  type NotificationSource,
-} from '../src/state/notifications'
+import { NotificationsProvider, useNotify } from '../src/state/notifications'
 
-function Controls({ message, source }: { message: string; source: NotificationSource }) {
+function Controls({ message }: { message: string }) {
   const { notify } = useNotify()
-  return <button onClick={() => notify(message, source)}>{`show ${message}`}</button>
+  return <button onClick={() => notify(message)}>{`show ${message}`}</button>
 }
 
-function ClearButtons() {
+function ClearButton() {
   const { clear } = useNotify()
-  return (
-    <>
-      <button onClick={() => clear('api')}>clear api</button>
-      <button onClick={() => clear('route')}>clear route</button>
-    </>
-  )
+  return <button onClick={() => clear()}>clear all</button>
 }
 
 function renderToast(children: React.ReactNode) {
@@ -35,7 +26,7 @@ function renderToast(children: React.ReactNode) {
 describe('notify and Toast (FR-D-9)', () => {
   it('shows the message in an alert', async () => {
     const user = userEvent.setup()
-    renderToast(<Controls message="Can't reach the dog.ceo API" source="api" />)
+    renderToast(<Controls message="Can't reach the dog.ceo API" />)
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /show/ }))
@@ -45,7 +36,7 @@ describe('notify and Toast (FR-D-9)', () => {
 
   it('shows one pop-up when the same message is raised twice', async () => {
     const user = userEvent.setup()
-    renderToast(<Controls message="Can't reach the dog.ceo API" source="api" />)
+    renderToast(<Controls message="Can't reach the dog.ceo API" />)
 
     await user.click(screen.getByRole('button', { name: /show/ }))
     await user.click(screen.getByRole('button', { name: /show/ }))
@@ -57,8 +48,8 @@ describe('notify and Toast (FR-D-9)', () => {
     const user = userEvent.setup()
     renderToast(
       <>
-        <Controls message="first problem" source="api" />
-        <Controls message="second problem" source="route" />
+        <Controls message="first problem" />
+        <Controls message="second problem" />
       </>,
     )
 
@@ -70,7 +61,7 @@ describe('notify and Toast (FR-D-9)', () => {
 
   it('removes a pop-up with its dismiss button', async () => {
     const user = userEvent.setup()
-    renderToast(<Controls message="Can't reach the dog.ceo API" source="api" />)
+    renderToast(<Controls message="Can't reach the dog.ceo API" />)
     await user.click(screen.getByRole('button', { name: /show/ }))
 
     await user.click(screen.getByRole('button', { name: /dismiss/i }))
@@ -79,34 +70,48 @@ describe('notify and Toast (FR-D-9)', () => {
   })
 })
 
-describe('clear by source', () => {
-  it('clears api pop-ups without touching route pop-ups, and the other way round', async () => {
+describe('clear (a later API call succeeded)', () => {
+  it('removes every pop-up', async () => {
     const user = userEvent.setup()
     renderToast(
       <>
-        <Controls message="api problem" source="api" />
-        <Controls message="route problem" source="route" />
-        <ClearButtons />
+        <Controls message="first problem" />
+        <Controls message="second problem" />
+        <ClearButton />
       </>,
     )
-    await user.click(screen.getByRole('button', { name: 'show api problem' }))
-    await user.click(screen.getByRole('button', { name: 'show route problem' }))
+    await user.click(screen.getByRole('button', { name: 'show first problem' }))
+    await user.click(screen.getByRole('button', { name: 'show second problem' }))
+    expect(screen.getAllByRole('alert')).toHaveLength(2)
 
-    await user.click(screen.getByRole('button', { name: 'clear api' }))
-    expect(screen.getAllByRole('alert')).toHaveLength(1)
-    expect(screen.getByRole('alert')).toHaveTextContent('route problem')
+    await user.click(screen.getByRole('button', { name: 'clear all' }))
 
-    await user.click(screen.getByRole('button', { name: 'clear route' }))
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('does nothing when there is nothing to clear', async () => {
     const user = userEvent.setup()
-    renderToast(<ClearButtons />)
+    renderToast(<ClearButton />)
 
-    await user.click(screen.getByRole('button', { name: 'clear api' }))
+    await user.click(screen.getByRole('button', { name: 'clear all' }))
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('lets the same message be shown again afterwards', async () => {
+    const user = userEvent.setup()
+    renderToast(
+      <>
+        <Controls message="problem" />
+        <ClearButton />
+      </>,
+    )
+    await user.click(screen.getByRole('button', { name: 'show problem' }))
+    await user.click(screen.getByRole('button', { name: 'clear all' }))
+
+    await user.click(screen.getByRole('button', { name: 'show problem' }))
+
+    expect(screen.getAllByRole('alert')).toHaveLength(1)
   })
 })
 
@@ -116,7 +121,7 @@ describe('useNotify', () => {
     const before = result.current
 
     act(() => {
-      result.current.notify('something went wrong', 'api')
+      result.current.notify('something went wrong')
     })
     rerender()
 

@@ -8,22 +8,17 @@ import {
   type ReactNode,
 } from 'react'
 
-/** Where a pop-up came from, so it can be cleared when that cause goes away. */
-export type NotificationSource = 'api' | 'route'
-
 export interface Notification {
   id: number
-  kind: 'error'
-  source: NotificationSource
   message: string
 }
 
 interface NotifyActions {
   /** Shows a red pop-up; a message that is already showing is not shown twice. */
-  notify: (message: string, source: NotificationSource) => void
+  notify: (message: string) => void
   dismiss: (id: number) => void
-  /** Removes every pop-up of the given source. */
-  clear: (source: NotificationSource) => void
+  /** Removes every pop-up: used when an API call succeeds again. */
+  clear: () => void
 }
 
 // Two contexts: the actions never change, so components that only raise
@@ -35,12 +30,12 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<readonly Notification[]>([])
   const nextId = useRef(1)
 
-  const notify = useCallback((message: string, source: NotificationSource) => {
+  const notify = useCallback((message: string) => {
     const id = nextId.current++
     setNotifications((current) =>
       current.some((item) => item.message === message)
         ? current
-        : [...current, { id, kind: 'error', source, message }],
+        : [...current, { id, message }],
     )
   }, [])
 
@@ -48,11 +43,8 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     setNotifications((current) => current.filter((item) => item.id !== id))
   }, [])
 
-  const clear = useCallback((source: NotificationSource) => {
-    setNotifications((current) => {
-      const kept = current.filter((item) => item.source !== source)
-      return kept.length === current.length ? current : kept
-    })
+  const clear = useCallback(() => {
+    setNotifications((current) => (current.length === 0 ? current : []))
   }, [])
 
   const actions = useMemo(() => ({ notify, dismiss, clear }), [notify, dismiss, clear])

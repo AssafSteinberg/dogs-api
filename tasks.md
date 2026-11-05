@@ -96,8 +96,8 @@ Test files live in `tests/`, named after the unit (e.g. `tests/leaf.test.ts`). "
 ### Milestone v0.2 — Shell and data
 
 #### T09 · Notifications and the red pop-up · `task/09-notifications-toast`
-- **Scope:** `src/state/notifications.tsx` (`NotificationsProvider`, `useNotify()` with `source: 'api' | 'route'`, de-duplication by message, dismiss, clear-on-API-success) and `src/components/Toast.tsx` (red, bottom of the screen, `role="alert"`, dismiss button). Architecture 6.5.
-- **Tests (red first):** (1) `notify` shows a red alert with the message; (2) the same message twice shows one pop-up (FR-D-9); (3) the dismiss button removes it; (4) an API-success signal clears `source: 'api'` pop-ups but not `source: 'route'` ones.
+- **Scope:** `src/state/notifications.tsx` (`NotificationsProvider`, `useNotify()` with `notify(message)`, `dismiss(id)` and `clear()`, de-duplication by message, clear-on-API-success; the `source: 'api' | 'route'` it first had was removed when the item page replaced the unknown-URL pop-up) and `src/components/Toast.tsx` (red, bottom of the screen, `role="alert"`, dismiss button). Architecture 6.5.
+- **Tests (red first):** (1) `notify` shows a red alert with the message; (2) the same message twice shows one pop-up (FR-D-9); (3) the dismiss button removes it; (4) `clear()` (an API success) removes the pop-ups.
 - **Done when:** tests green.
 
 #### T10 · API status indicator · `task/10-api-status`
