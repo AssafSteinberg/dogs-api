@@ -56,10 +56,13 @@ export function useBreedImage(leaf: Leaf): BreedImageState {
     return () => controller.abort()
   }, [leaf, attempt, notify, clear])
 
+  const leafId = leaf.id
   const retry = useCallback(() => {
+    // Also forget a cached image, for the case where its file would not load (FR-D-5).
+    imageCache.delete(leafId)
     setSettled(null)
     setAttempt((value) => value + 1)
-  }, [])
+  }, [leafId])
 
   const cached = imageCache.get(leaf.id)
   if (cached !== undefined) return { status: 'done', url: cached, retry }

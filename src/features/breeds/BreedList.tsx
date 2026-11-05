@@ -1,9 +1,8 @@
 import type { Leaf, LeafId } from '../../domain/leaf'
-import { leafName } from '../../domain/leaf'
 import { useWishlist } from '../../state/collection'
+import { BreedDetails } from './BreedDetails'
 import { BreedItem } from './BreedItem'
 import styles from './BreedList.module.css'
-import { detailsId } from './detailsId'
 
 interface BreedListProps {
   leaves: readonly Leaf[]
@@ -31,8 +30,7 @@ export function BreedList({ leaves, expandedId, onToggle }: BreedListProps) {
             wishlisted={has(leaf.id)}
             onToggle={onToggle}
           >
-            {/* Placeholder: the real details (random image, actions) arrive in T18. */}
-            {expanded ? <div id={detailsId(leaf.id)} role="region" aria-label={`${leafName(leaf)} details`} /> : null}
+            {expanded ? <BreedDetails leaf={leaf} /> : null}
           </BreedItem>
         )
       })}
