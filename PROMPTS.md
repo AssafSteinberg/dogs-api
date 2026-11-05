@@ -29,3 +29,12 @@
 **10:56 · claude**
 
 > track PROMPTS.md from now on. Commit it too
+
+**11:02 · claude**
+
+> A few corrections - 1. Expansion of a detail in the master page should also be relected in the URI (enabling
+>   routing, React Router should be used for that). 2. A breed without sub-breeds will not have a breed tag at all, only sub-breeds will have a tag  indicating breed. Fix that please
+
+**11:05 · claude**
+
+> Yes please
