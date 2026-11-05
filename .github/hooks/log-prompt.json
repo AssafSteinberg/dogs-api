@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "hooks": {
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "bash": "node ./scripts/log-prompt.mjs copilot",
+        "powershell": "node ./scripts/log-prompt.mjs copilot",
+        "cwd": ".",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}

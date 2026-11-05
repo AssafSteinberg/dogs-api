@@ -1,0 +1,15 @@
+{
+  "description": "Log every prompt to PROMPTS.md",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./scripts/log-prompt.mjs codex"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "BeforeAgent": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "log-prompt",
+            "type": "command",
+            "command": "node ./scripts/log-prompt.mjs gemini"
+          }
+        ]
+      }
+    ]
+  }
+}
