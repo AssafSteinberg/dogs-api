@@ -56,8 +56,8 @@ const filterBox = () => within(main()).getByRole('searchbox', { name: 'Filter br
 const sortButton = () => within(main()).getByRole('button', { name: /^Sort by breed name/ })
 const count = () => within(main()).getByText(/^\d+ of \d+$/)
 const rows = () => within(main()).queryAllByRole('listitem')
-const rowNames = () => rows().map((item) => within(item).getAllByRole('button')[0]?.textContent ?? '')
-const row = (name: RegExp) => within(main()).getByRole('button', { name })
+const rowNames = () => rows().map((item) => within(item).getAllByRole('link')[0]?.textContent ?? '')
+const row = (name: RegExp) => within(main()).getByRole('link', { name })
 
 async function listLoaded() {
   await waitFor(() => expect(rows().length).toBeGreaterThan(0))
