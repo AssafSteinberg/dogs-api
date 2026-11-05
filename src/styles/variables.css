@@ -13,4 +13,14 @@
   --color-status-loading: #5f6368;
   --color-status-failed: var(--color-error-bg);
   --color-status-done: #1e7a3c;
+
+  /* Page frame */
+  --sidebar-width: 14rem;
+  --color-text: #1c1b1f;
+  --color-bg: #ffffff;
+  --color-sidebar-bg: #f4f3f6;
+  --color-border: #d9d7de;
+  --color-link-hover-bg: #e9e7ef;
+  --color-link-active-bg: #dcd8ec;
+  --color-focus: #3b2fa0;
 }
