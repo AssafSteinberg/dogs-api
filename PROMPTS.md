@@ -38,3 +38,23 @@
 **11:05 · claude**
 
 > Yes please
+
+**11:08 · claude**
+
+> Before we continue, since we moved to dogs, I changed the remote to dogs-api. Change the project name here accordingly
+
+**11:08 · claude**
+
+> Yes, update the remote URL
+
+**11:11 · claude**
+
+> I changed the folder's name. Make sure everything's intact
+
+**11:11 · claude**
+
+> Good. Let's continue with architecture.md
+
+**11:46 · claude**
+
+> Commit first version together with prompts and then fix the following things. Section 1 - I want to add UI tests using @vitest/ui. Section 6 - I want API calls to be implemented in async/await syntax and not explicit promises. I want visual indication of the api call status (Loading, Failed, Done). I want the user to get notified when unable to access the API using a red pop-up element on the bottom of the screen. 6.3 - image on error should mention the breed or sub-breed's name. section 10 - implement at least 5 tests that will run with with npm test to clear version or deployment milestones. Add another section about sorting and filtering of the breeds list (master) - I want to be able to sort in asc or desc order by breed name and filter by name too. Layout and UI - Make sure compatibility with narrow screen. Sidebar will be collapsable for such scenario (default expanded). Section 9 - URL names an unknown leaf should also be rendered in a popup like 6.3, not as mentioned now. 11 - decisions - all confirmed.
