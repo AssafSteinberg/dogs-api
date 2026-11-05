@@ -10,7 +10,6 @@ export interface Collection {
 
 // The schema version is part of the key: a future schema uses a new key, and old data is ignored.
 const COLLECTION_KEY = 'dogs-api:v1:collection'
-const PROBE_KEY = 'dogs-api:probe'
 
 let warnedUnavailable = false
 
@@ -98,18 +97,5 @@ export function saveCollection(collection: Collection): void {
     storage.setItem(COLLECTION_KEY, JSON.stringify(collection))
   } catch {
     warnStorageUnavailable()
-  }
-}
-
-/** True when the browser lets us write to localStorage. */
-export function isStorageAvailable(): boolean {
-  const storage = getStorage()
-  if (storage === null) return false
-  try {
-    storage.setItem(PROBE_KEY, '1')
-    storage.removeItem(PROBE_KEY)
-    return true
-  } catch {
-    return false
   }
 }
