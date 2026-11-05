@@ -1,13 +1,13 @@
 # Implementation Plan — Dog Breed Explorer
 
-Status: Draft v2 (awaiting approval) · Date: 2026-11-05
+Status: v3, approved (branch workflow updated) · Date: 2026-11-05
 Sources of truth: `PRD.md` (Draft v4) and `architecture.md` (Draft v3). Requirement IDs (FR-…) refer to the PRD; section numbers refer to `architecture.md`.
 **Implementation starts only when this file is approved.**
 
 ## 1. Working agreement
 
 1. **One task at a time**, in the order below. Each task is one function, component or small feature.
-2. **One feature branch per task**, created from an up-to-date `main`: `task/NN-short-name` (e.g. `task/05-dog-api-client`).
+2. **Branches:** `dev` is always based on an up-to-date `main`. **Each task gets one feature branch created from an up-to-date `dev`**: `task/NN-short-name` (e.g. `task/05-dog-api-client`).
 3. **Red → Green** inside every task:
    1. Write the task's tests (a few, listed in the task).
    2. Run `npm test`. **The new tests must fail** for the right reason (missing module or missing behaviour, not a typo). Show the failing output.
@@ -17,8 +17,8 @@ Sources of truth: `PRD.md` (Draft v4) and `architecture.md` (Draft v3). Requirem
 5. **Moving to the next task requires all tests up to that stage to pass**, unless you explicitly permit otherwise.
 6. **Permission gates:**
    - I **ask before every commit**. I commit only the files of the current task, with a short message.
-   - I **never merge** without your explicit order. You merge manually or tell me to. **One task branch is merged at a time**, and the next branch starts from `main` after that merge.
-   - Documentation (`PRD.md`, `architecture.md`, `tasks.md`, `PROMPTS.md`) is the only thing committed directly to `main`. All code goes through task branches.
+   - I **never merge** without your explicit order. You merge manually or tell me to. **Task branches are merged into `dev`, one at a time**, and the next task branch starts from `dev` after that merge. **`dev` is merged into `main` only between milestones**, on your order; afterwards `dev` is brought up to date with `main`.
+   - Documentation (`PRD.md`, `architecture.md`, `tasks.md`, `PROMPTS.md`) is the only thing committed directly to `main`. All code goes through task branches into `dev`, and reaches `main` only through a milestone merge.
 7. **No improvisation.** No new features, dependencies, libraries, technologies or external services beyond `PRD.md` and `architecture.md`. If a task cannot be completed within them, I **stop and ask** instead of working around it. Allowed dependencies are exactly those named in `architecture.md` section 1 and 10.1; each is installed in the task that first needs it.
 8. If a test, PRD item or architecture item looks wrong or contradictory, I stop and ask. Documents are changed only on your instruction.
 9. Code rules apply to every task: strict TypeScript with no `any` and no unchecked casts; `async`/`await` only (no `new Promise`, no `.then()`); the folder structure and boundaries of architecture section 3; styles in CSS Modules using the shared variables; each component built to work at 320 px wide.
