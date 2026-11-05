@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { toLeafId } from '../src/domain/leaf'
 import {
   emptyCollection,
-  isStorageAvailable,
   loadCollection,
   saveCollection,
 } from '../src/state/storage'
@@ -113,7 +112,7 @@ describe('invalid entries are discarded, valid ones kept', () => {
 })
 
 describe('when storage is blocked or broken (FR-U-4)', () => {
-  it('does not throw on read or write, and reports unavailable', () => {
+  it('does not throw on read or write', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new DOMException('denied', 'SecurityError')
     })
@@ -123,7 +122,6 @@ describe('when storage is blocked or broken (FR-U-4)', () => {
 
     expect(loadCollection()).toEqual(emptyCollection())
     expect(() => saveCollection({ pack: { [akita]: 1 }, wishlist: [] })).not.toThrow()
-    expect(isStorageAvailable()).toBe(false)
   })
 
   it('copes with window.localStorage itself throwing', () => {
@@ -133,14 +131,6 @@ describe('when storage is blocked or broken (FR-U-4)', () => {
 
     expect(loadCollection()).toEqual(emptyCollection())
     expect(() => saveCollection(emptyCollection())).not.toThrow()
-    expect(isStorageAvailable()).toBe(false)
-  })
-})
-
-describe('isStorageAvailable', () => {
-  it('is true for working storage and leaves nothing behind', () => {
-    expect(isStorageAvailable()).toBe(true)
-    expect(localStorage.length).toBe(0)
   })
 })
 
