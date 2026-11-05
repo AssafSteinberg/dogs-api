@@ -1,0 +1,11 @@
+:root {
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --radius: 0.5rem;
+  --tap-target: 44px;
+  --z-toast: 1000;
+
+  /* Red pop-up: white on this red has a contrast ratio above 7:1. */
+  --color-error-bg: #b3261e;
+  --color-error-text: #ffffff;
+}
