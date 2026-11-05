@@ -1,6 +1,6 @@
 # Implementation Plan — Dog Breed Explorer
 
-Status: v3, approved (branch workflow updated) · Date: 2026-11-05
+Status: v4, approved (banner task replaced by a console warning) · Date: 2026-11-05
 Sources of truth: `PRD.md` (Draft v4) and `architecture.md` (Draft v3). Requirement IDs (FR-…) refer to the PRD; section numbers refer to `architecture.md`.
 **Implementation starts only when this file is approved.**
 
@@ -37,8 +37,8 @@ A milestone is cleared only when `npm test` (at least 5 tests, all passing), `np
 | **v0.1 Core logic** | T08 | All pure logic done and tested |
 | **v0.2 Shell and data** | T15 | App shell, routing, data providers |
 | **v0.3 Browse** | T19 | Complete Breeds page |
-| **v0.4 Collections** | T22 | Pack, Wishlist, persistence safety |
-| **v1.0 Release candidate** | T24 | Responsive pass and PRD acceptance walkthrough done |
+| **v0.4 Collections** | T21 | Pack and Wishlist pages |
+| **v1.0 Release candidate** | T23 | Responsive pass and PRD acceptance walkthrough done |
 
 ## 2. Tasks
 
@@ -122,7 +122,7 @@ Test files live in `tests/`, named after the unit (e.g. `tests/leaf.test.ts`). "
 #### T14 · Collapsible sidebar · `task/14-sidebar-collapse`
 - **Scope:** collapse/expand toggle with `aria-expanded` and `aria-controls`; **expanded by default**; icon rail when collapsed on wide screens; drawer with backdrop on narrow screens that closes on link click, `Escape` and backdrop click; focus handling (architecture 8.1, FR-NAV-3).
 - **Tests (red first):** (1) starts expanded; (2) the toggle collapses and expands and updates `aria-expanded`; (3) `Escape` closes the open drawer; (4) choosing a link closes the drawer in narrow mode (narrow mode is simulated by stubbing `matchMedia`).
-- **Done when:** tests green; visual behaviour is verified in T23.
+- **Done when:** tests green; visual behaviour is verified in T22.
 
 #### T15 · Collection provider · `task/15-collection-provider`
 - **Scope:** `src/state/collection.tsx`: `CollectionProvider` using the reducer, loading the collection once on mount and saving it after every change through `storage.ts`; narrow hooks `usePack()` and `useWishlist()` (architecture 7.2, FR-U-1, U-2).
@@ -158,37 +158,33 @@ Test files live in `tests/`, named after the unit (e.g. `tests/leaf.test.ts`). "
 ### Milestone v0.4 — Collections
 
 #### T20 · Pack page · `task/20-pack-page`
-- **Scope:** `PackPage`: one row per leaf with its count and tag (sub-breeds only), remove-one button, empty state with a link to `/breeds`, "No longer available" row with remove for IDs missing from the API (FR-P-2 to P-4, U-3).
+- **Scope:** `PackPage`: one row per leaf with its count and tag (sub-breeds only), remove-one button, empty state with a link to `/breeds`, "No longer available" row with remove for IDs missing from the API (FR-P-2 to P-4, U-3). **Also:** `storage.ts` logs a one-time `console.warn` when the browser cannot store (replaces the dropped banner task; FR-U-4).
 - **Tests (red first):** (1) a leaf added three times shows one row with a count of 3; (2) remove lowers the count and the row disappears at zero; (3) the empty state links to `/breeds`; (4) an unknown stored ID shows "No longer available" with a working remove and makes no image request.
 - **Done when:** tests green.
 
 #### T21 · Wishlist page · `task/21-wishlist-page`
 - **Scope:** `WishlistPage`: list of wishlisted leaves with tag (sub-breeds only), remove, empty state with a link to `/breeds`, "No longer available" handling (FR-W-2, W-3, U-3).
 - **Tests (red first):** (1) wishlisted leaves are listed; (2) remove deletes the entry; (3) the empty state links to `/breeds`; (4) an unknown stored ID shows "No longer available" with remove; (5) a leaf may appear on both pages independently.
-- **Done when:** tests green.
-
-#### T22 · Storage-unavailable banner · `task/22-storage-banner`
-- **Scope:** the banner in `AppLayout` when `isStorageAvailable()` is false, and the in-memory fallback in the collection provider (architecture 7.3, FR-U-4).
-- **Tests (red first):** (1) with throwing storage the banner appears; (2) the app still works in memory (adding to the Pack and the Wishlist succeeds); (3) with working storage there is no banner.
 - **Done when:** tests green. **Milestone v0.4 gate.**
 
 ---
 
 ### Milestone v1.0 — Release candidate
 
-#### T23 · Narrow-screen verification and fixes · `task/23-responsive-pass`
+#### T22 · Narrow-screen verification and fixes · `task/22-responsive-pass`
 - **Type:** verification task; the layout is CSS and cannot be tested in jsdom (architecture 10.2). There is no new feature.
 - **Scope:** check every page at 320, 375, 768 and desktop widths in the browser's responsive mode against architecture 8.1 and PRD acceptance 11: no horizontal scroll, 44 px tap targets, sidebar drawer behaviour, pop-up fits the screen, images scale. Fix layout defects found, in CSS only.
 - **Checks (instead of red tests):** a written checklist of each page × width, reported to you with pass/fail. Existing tests stay green.
 - **Done when:** the checklist is all pass and you have seen it.
 
-#### T24 · Template cleanup and acceptance walkthrough · `task/24-cleanup-acceptance`
+#### T23 · Template cleanup and acceptance walkthrough · `task/23-cleanup-acceptance`
 - **Scope:** remove unused Vite template leftovers (`App.css`, unused assets, template text), confirm no `any`, no `new Promise`/`.then` and no unused dependency. Walk through acceptance criteria 1–12 of the PRD and report each with evidence. No new features.
 - **Tests:** none new; `npm test` (at least 5 tests), `npm run lint` and `npm run build` must pass.
 - **Done when:** every acceptance criterion is reported as met, or the gaps are listed for your decision. **Milestone v1.0 gate.**
 
 ## 3. Not in this plan
 - **Deployment.** The production host is undecided (PRD open item 8). A deployment task is added only after you choose a host; it would need the "serve `index.html` for unknown paths" rule.
+- A visible storage-unavailable banner: dropped; the app logs a console warning instead (FR-U-4).
 - Anything outside the PRD's scope: accounts or a backend, extra filters, images on the Pack and Wishlist pages, a "new random image" button, cross-tab sync.
 
 ## 4. Test coverage map

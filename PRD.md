@@ -91,7 +91,7 @@ There are no user profiles or sign-in: the app opens straight onto the Breeds pa
 - **FR-U-1** The Pack and Wishlist are saved in the browser (`localStorage`) and restored on the next visit.
 - **FR-U-2** Only identifiers (breed and sub-breed keys) are stored, not images or API data.
 - **FR-U-3** If stored data is missing, unreadable or refers to a (sub-)breed the API no longer returns, the app recovers without crashing: unreadable data is reset to empty, and an unknown entry is shown as "No longer available" with a remove button.
-- **FR-U-4** If the browser blocks storage entirely, the app keeps working for the visit and shows a banner saying the Pack and Wishlist will not be saved.
+- **FR-U-4** If the browser blocks storage entirely, the app keeps working for the visit and logs a warning to the browser console saying the Pack and Wishlist will not be saved.
 
 ## 5. Data source: Dog CEO API
 
@@ -150,7 +150,7 @@ Limitations that shape the product:
 | 4 | Should the Pack and Wishlist pages show the sub-breed image? | Not required for v1; would cost one image request per entry |
 | 5 | A "new random image" button on the details | Out of scope for v1 |
 | 6 | The API is community-run with no SLA and may change or be unavailable | Defensive parsing, error states, `localStorage` holds IDs only |
-| 7 | `localStorage` can be cleared by the user or blocked in private browsing | Recover gracefully (FR-U-3), tell the user (FR-U-4) |
+| 7 | `localStorage` can be cleared by the user or blocked in private browsing | Recover gracefully (FR-U-3), log a console warning (FR-U-4) |
 | 8 | The production host is not chosen and must rewrite unknown paths to `index.html` | Decide before the first deployment milestone |
 
 ## 9. Next steps
