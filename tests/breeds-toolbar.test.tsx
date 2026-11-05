@@ -144,11 +144,13 @@ describe('filtering (FR-M-6, FR-M-7)', () => {
     await user.type(filterBox(), 'afg')
     await waitFor(() => expect(url()).toHaveTextContent('/breeds?q=afg'))
     await user.click(row(/^Afghan\s*Hound/))
-    expect(url()).toHaveTextContent('/breeds/hound/afghan?q=afg')
+    // The item URL does not carry the filter; Back returns to the filtered list (FR-M-7).
+    expect(url()).toHaveTextContent(/^\/breeds\/hound\/afghan$/)
 
     await user.click(screen.getByRole('button', { name: 'browser back' }))
 
     expect(url()).toHaveTextContent(/^\/breeds\?q=afg$/)
+    expect(rows()).toHaveLength(1)
   })
 
   it('shows a message and a Clear filter button when nothing matches; Clear restores the list', async () => {
@@ -235,43 +237,5 @@ describe('opening a URL with a filter and an order (FR-M-7)', () => {
     expect(sortButton()).toHaveAccessibleName(/Z to A/)
     expect(rows()).toHaveLength(matching('ha'))
     expect(count()).toHaveTextContent(`${matching('ha')} of 165`)
-  })
-})
-
-describe('expanding keeps the view (FR-M-7)', () => {
-  it('keeps the filter and the order in the URL while a row is expanded and collapsed', async () => {
-    const user = userEvent.setup()
-    renderAt('/breeds?q=ha&sort=desc')
-    await listLoaded()
-    const first = rowNames()[0] ?? ''
-
-    await user.click(within(rows()[0] as HTMLElement).getAllByRole('button')[0] as HTMLElement)
-    expect(url()).toHaveTextContent(/\?q=ha&sort=desc$/)
-    expect(rowNames()[0]).toBe(first)
-
-    await user.click(within(rows()[0] as HTMLElement).getAllByRole('button')[0] as HTMLElement)
-    expect(url()).toHaveTextContent(/^\/breeds\?q=ha&sort=desc$/)
-  })
-})
-
-describe('an expanded leaf hidden by the filter stays visible (FR-M-8)', () => {
-  it('pins it, expanded, among the matches', async () => {
-    renderAt('/breeds/hound/afghan?q=akita')
-    await listLoaded()
-
-    expect(rows()).toHaveLength(2)
-    expect(row(/^Afghan\s*Hound/)).toHaveAttribute('aria-expanded', 'true')
-    expect(row(/^Akita$/)).toHaveAttribute('aria-expanded', 'false')
-    expect(count()).toHaveTextContent('1 of 165')
-    expect(within(main()).getByRole('region', { name: 'Afghan Hound details' })).toBeInTheDocument()
-  })
-
-  it('puts the pinned leaf at its sorted position', async () => {
-    renderAt('/breeds/hound/afghan?q=akita')
-    await listLoaded()
-
-    // Akita sorts before hound, so the pinned Afghan Hound comes second.
-    expect(rowNames()[0]).toMatch(/^Akita/)
-    expect(rowNames()[1]).toMatch(/^Afghan\s*Hound/)
   })
 })

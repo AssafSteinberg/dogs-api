@@ -69,15 +69,23 @@ describe('routes', () => {
     },
   )
 
-  it.each(['/breeds/hound/afghan', '/breeds/akita', '/breeds/hound/nothing'])(
-    'still renders the Breeds page at %s and keeps the URL',
-    (deepLink) => {
-      renderAt(deepLink)
+  it.each([
+    ['/breeds/hound/afghan', 'Afghan Hound'],
+    ['/breeds/akita', 'Akita'],
+  ])('opens the item page at %s and keeps the URL', async (deepLink, name) => {
+    renderAt(deepLink)
 
-      expect(heading('Breeds')).toBeInTheDocument()
-      expect(path()).toHaveTextContent(deepLink)
-    },
-  )
+    expect(await screen.findByRole('heading', { level: 1, name })).toBeInTheDocument()
+    expect(path()).toHaveTextContent(deepLink)
+  })
+
+  it('shows the static 404 page at an unknown item URL and keeps the URL', async () => {
+    renderAt('/breeds/hound/nothing')
+
+    expect(await screen.findByRole('heading', { level: 1, name: '404' })).toBeInTheDocument()
+    expect(screen.getByText('Page not found.')).toBeInTheDocument()
+    expect(path()).toHaveTextContent('/breeds/hound/nothing')
+  })
 })
 
 describe('sidebar navigation (FR-NAV-1)', () => {
