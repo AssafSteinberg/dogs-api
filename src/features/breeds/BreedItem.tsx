@@ -1,6 +1,6 @@
 import { memo, type ReactNode } from 'react'
 import { Tag } from '../../components/Tag'
-import { leafName, leafTag, type LeafId } from '../../domain/leaf'
+import { leafFullName, leafTag, type LeafId } from '../../domain/leaf'
 import '../../styles/variables.css'
 import styles from './BreedItem.module.css'
 import { detailsId } from './detailsId'
@@ -44,7 +44,7 @@ export const BreedItem = memo(function BreedItem({
         aria-controls={detailsId(id)}
         onClick={() => onToggle(id)}
       >
-        <span className={styles.name}>{leafName(leaf)}</span>
+        <span className={styles.name}>{leafFullName(leaf)}</span>
         {/* The spaces keep the button's accessible name readable: "Afghan Hound", not "AfghanHound". */}
         {tag !== null && (
           <>

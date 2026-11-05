@@ -263,7 +263,7 @@ describe('an expanded leaf hidden by the filter stays visible (FR-M-8)', () => {
     expect(row(/^Afghan\s*Hound/)).toHaveAttribute('aria-expanded', 'true')
     expect(row(/^Akita$/)).toHaveAttribute('aria-expanded', 'false')
     expect(count()).toHaveTextContent('1 of 165')
-    expect(within(main()).getByRole('region', { name: 'Afghan (hound) details' })).toBeInTheDocument()
+    expect(within(main()).getByRole('region', { name: 'Afghan Hound details' })).toBeInTheDocument()
   })
 
   it('puts the pinned leaf at its sorted position', async () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { leafName, leafTag, parseLeafId, toLeafId } from '../src/domain/leaf'
+import { leafFullName, leafName, leafTag, parseLeafId, toLeafId } from '../src/domain/leaf'
 
 describe('toLeafId', () => {
   it('joins breed and sub-breed with a slash', () => {
@@ -37,6 +37,26 @@ describe('leafName', () => {
 
   it('capitalises the breed for a breed-only leaf', () => {
     expect(leafName({ id: toLeafId('akita', null), breed: 'akita', sub: null })).toBe('Akita')
+  })
+})
+
+describe('leafFullName', () => {
+  it('puts the breed after the sub-breed for a sub-breed leaf', () => {
+    expect(leafFullName({ id: toLeafId('hound', 'blood'), breed: 'hound', sub: 'blood' })).toBe('Blood Hound')
+    expect(leafFullName({ id: toLeafId('hound', 'afghan'), breed: 'hound', sub: 'afghan' })).toBe('Afghan Hound')
+  })
+
+  it('is just the capitalised breed for a breed without sub-breeds', () => {
+    expect(leafFullName({ id: toLeafId('akita', null), breed: 'akita', sub: null })).toBe('Akita')
+  })
+
+  it('does not change the short name or the id', () => {
+    const leaf = { id: toLeafId('hound', 'blood'), breed: 'hound', sub: 'blood' }
+
+    leafFullName(leaf)
+
+    expect(leafName(leaf)).toBe('Blood')
+    expect(leaf.id).toBe('hound/blood')
   })
 })
 

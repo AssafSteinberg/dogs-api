@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ApiStatus } from '../../components/ApiStatus'
 import { AsyncState } from '../../components/AsyncState'
 import { Tag } from '../../components/Tag'
-import { leafName, leafTag, type Leaf } from '../../domain/leaf'
+import { leafFullName, leafTag, type Leaf } from '../../domain/leaf'
 import { usePack, useWishlist } from '../../state/collection'
 import '../../styles/variables.css'
 import styles from './BreedDetails.module.css'
@@ -20,10 +20,9 @@ export function BreedDetails({ leaf }: { leaf: Leaf }) {
   // The image URL whose file failed to load; the URL resolved, but the picture did not.
   const [brokenUrl, setBrokenUrl] = useState<string | null>(null)
 
-  const name = leafName(leaf)
+  // "Afghan Hound" for a sub-breed, "Akita" for a breed without sub-breeds; the tag is unchanged.
+  const name = leafFullName(leaf)
   const tag = leafTag(leaf)
-  // "Afghan (hound)" for a sub-breed, "Akita" for a breed without sub-breeds.
-  const label = leaf.sub === null ? name : `${name} (${leaf.breed})`
 
   const fileFailed = image.url !== null && image.url === brokenUrl
   const status = fileFailed ? 'failed' : image.status
@@ -36,7 +35,7 @@ export function BreedDetails({ leaf }: { leaf: Leaf }) {
   }
 
   return (
-    <section id={detailsId(leaf.id)} className={styles.details} aria-label={`${label} details`}>
+    <section id={detailsId(leaf.id)} className={styles.details} aria-label={`${name} details`}>
       <div className={styles.heading}>
         <h2 className={styles.title}>{name}</h2>
         {tag !== null && <Tag>{tag}</Tag>}
@@ -48,7 +47,7 @@ export function BreedDetails({ leaf }: { leaf: Leaf }) {
             <img
               className={styles.image}
               src={image.url}
-              alt={label}
+              alt={name}
               onError={() => setBrokenUrl(image.url)}
             />
             <ApiStatus status="done" />
@@ -56,7 +55,7 @@ export function BreedDetails({ leaf }: { leaf: Leaf }) {
         ) : (
           <AsyncState
             status={status === 'failed' ? 'failed' : 'loading'}
-            failedMessage={`Couldn't load an image of ${label}`}
+            failedMessage={`Couldn't load an image of ${name}`}
             onRetry={retry}
           />
         )}
