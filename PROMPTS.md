@@ -208,3 +208,13 @@
 **14:14 · claude**
 
 > Commit T11, push and merge, then fix the tasks.md line
+
+## 2026-11-05
+
+**14:16 · claude**
+
+> for T12, remove test req
+
+**14:17 · claude**
+
+> for T12, remove test req (3) in tasks.md and commit the new tasks.md
