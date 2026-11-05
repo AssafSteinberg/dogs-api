@@ -266,3 +266,13 @@
 **15:30 · claude**
 
 > Commit, push and merge both, then sync dev. I approve the 0.3 milestone]
+
+## 2026-11-05
+
+**15:34 · claude**
+
+> first remove T22 from our tasks. I don't want it, turn it into console log and not a component. Then continue to T20
+
+**15:42 · claude**
+
+> Approve all. implement all the rest and finish the job.
