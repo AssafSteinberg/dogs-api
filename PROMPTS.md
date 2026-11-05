@@ -74,3 +74,7 @@
 **12:20 · claude**
 
 > You can commit this version. I want to get rid of the profile feature all together, remove it from the PRD, Architecture and tasks. The user will simply have all features but they will not be kept in the context of a specific profile (with others available).
+
+**12:23 · claude**
+
+> Yes, commit them

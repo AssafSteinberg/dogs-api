@@ -1,7 +1,7 @@
 # Implementation Plan — Dog Breed Explorer
 
-Status: Draft v1 (awaiting approval) · Date: 2026-11-05
-Sources of truth: `PRD.md` (Draft v3) and `architecture.md` (Draft v2). Requirement IDs (FR-…) refer to the PRD; section numbers refer to `architecture.md`.
+Status: Draft v2 (awaiting approval) · Date: 2026-11-05
+Sources of truth: `PRD.md` (Draft v4) and `architecture.md` (Draft v3). Requirement IDs (FR-…) refer to the PRD; section numbers refer to `architecture.md`.
 **Implementation starts only when this file is approved.**
 
 ## 1. Working agreement
@@ -35,10 +35,10 @@ A milestone is cleared only when `npm test` (at least 5 tests, all passing), `np
 | Milestone | After task | Meaning |
 |---|---|---|
 | **v0.1 Core logic** | T08 | All pure logic done and tested |
-| **v0.2 Shell and data** | T17 | App shell, routing, profiles, data providers |
-| **v0.3 Browse** | T21 | Complete Breeds page |
-| **v0.4 Collections** | T24 | Pack, Wishlist, persistence safety |
-| **v1.0 Release candidate** | T26 | Responsive pass and PRD acceptance walkthrough done |
+| **v0.2 Shell and data** | T15 | App shell, routing, data providers |
+| **v0.3 Browse** | T19 | Complete Breeds page |
+| **v0.4 Collections** | T22 | Pack, Wishlist, persistence safety |
+| **v1.0 Release candidate** | T24 | Responsive pass and PRD acceptance walkthrough done |
 
 ## 2. Tasks
 
@@ -81,7 +81,7 @@ Test files live in `tests/`, named after the unit (e.g. `tests/leaf.test.ts`). "
 
 #### T07 · Safe storage · `task/07-storage`
 - **Scope:** `src/state/storage.ts`: versioned read/write of the keys in architecture 7.1, guards for stored data, `try/catch` everywhere, and an `isStorageAvailable()` check.
-- **Tests (red first):** (1) write then read returns the same profiles and collection data; (2) corrupt JSON returns the empty default; (3) a wrong schema version returns the empty default; (4) a throwing `localStorage` (read and write) does not throw and reports unavailable; (5) stored pack counts that are not positive integers are discarded.
+- **Tests (red first):** (1) write then read returns the same collection data; (2) corrupt JSON returns the empty default; (3) a wrong schema version returns the empty default; (4) a throwing `localStorage` (read and write) does not throw and reports unavailable; (5) stored pack counts that are not positive integers are discarded.
 - **Done when:** tests green; this is the only module that touches `localStorage`.
 
 #### T08 · Collection reducer · `task/08-collection-reducer`
@@ -119,45 +119,35 @@ Test files live in `tests/`, named after the unit (e.g. `tests/leaf.test.ts`). "
 - **Done when:** tests green; `npm run dev` shows the shell.
 
 #### T14 · Collapsible sidebar · `task/14-sidebar-collapse`
-- **Scope:** collapse/expand toggle with `aria-expanded` and `aria-controls`; **expanded by default**; icon rail when collapsed on wide screens; drawer with backdrop on narrow screens that closes on link click, `Escape` and backdrop click; focus handling (architecture 8.1, FR-NAV-4).
+- **Scope:** collapse/expand toggle with `aria-expanded` and `aria-controls`; **expanded by default**; icon rail when collapsed on wide screens; drawer with backdrop on narrow screens that closes on link click, `Escape` and backdrop click; focus handling (architecture 8.1, FR-NAV-3).
 - **Tests (red first):** (1) starts expanded; (2) the toggle collapses and expands and updates `aria-expanded`; (3) `Escape` closes the open drawer; (4) choosing a link closes the drawer in narrow mode (narrow mode is simulated by stubbing `matchMedia`).
-- **Done when:** tests green; visual behaviour is verified in T25.
+- **Done when:** tests green; visual behaviour is verified in T23.
 
-#### T15 · Profiles state · `task/15-profiles-state`
-- **Scope:** `src/state/profiles.tsx`: `ProfilesProvider`, `useProfiles()`, `createProfile(name)`, `switchProfile(id)`, active profile restored from storage, name rules (1–30 characters after trimming, unique ignoring case), IDs from `crypto.randomUUID()` (FR-U-1, U-2, U-4).
-- **Tests (red first):** (1) creating a profile makes it active and persists it; (2) a name that is empty, too long or a case-insensitive duplicate is rejected; (3) the last active profile is restored on a fresh mount; (4) switching changes the active profile.
-- **Done when:** tests green.
-
-#### T16 · Profile UI and gate · `task/16-profile-ui`
-- **Scope:** `CreateProfileForm`, `ProfileSwitcher` (in the sidebar), and the gate in `AppLayout` showing the form instead of the page when no profile is active, preserving the requested URL; the "profiles are local to this browser" note (FR-NAV-2, FR-U-1, U-2, U-6).
-- **Tests (red first):** (1) with no profile the form is shown and the page is not; (2) submitting a valid name shows the page, at the originally requested URL (`/breeds/hound/afghan`); (3) an invalid name shows an error and stays on the form; (4) the switcher lists profiles and switching works.
-- **Done when:** tests green.
-
-#### T17 · Collection provider · `task/17-collection-provider`
-- **Scope:** `src/state/collection.tsx`: `CollectionProvider` using the reducer, loading and saving the active profile's collection through `storage.ts`; narrow hooks `usePack()` and `useWishlist()` (architecture 7.2, FR-U-3, U-5).
-- **Tests (red first):** (1) actions update state and persist to the active profile's key; (2) remounting restores the same Pack and Wishlist (acceptance 5); (3) a second profile has its own data; (4) only LeafIds and counts are stored (no names or images).
+#### T15 · Collection provider · `task/15-collection-provider`
+- **Scope:** `src/state/collection.tsx`: `CollectionProvider` using the reducer, loading the collection once on mount and saving it after every change through `storage.ts`; narrow hooks `usePack()` and `useWishlist()` (architecture 7.2, FR-U-1, U-2).
+- **Tests (red first):** (1) actions update state and persist to the `dogs-api:v1:collection` key; (2) remounting restores the same Pack and Wishlist (acceptance 5); (3) empty or corrupt storage starts with an empty Pack and Wishlist; (4) only LeafIds and counts are stored (no names or images).
 - **Done when:** tests green. **Milestone v0.2 gate.**
 
 ---
 
 ### Milestone v0.3 — Browse
 
-#### T18 · Breed list row · `task/18-breed-item`
+#### T16 · Breed list row · `task/16-breed-item`
 - **Scope:** `BreedItem` (memoised): name, tag chip for sub-breeds only, wishlist marker, toggle `<button>` with `aria-expanded` and `aria-controls`, calling an `onToggle` prop (FR-M-2, FR-W-4, FR-D-7).
 - **Tests (red first):** (1) a sub-breed row shows its name and the breed tag; (2) a breed-only row shows no tag; (3) the toggle reflects `expanded` in `aria-expanded` and calls `onToggle` on click and on keyboard Enter/Space; (4) a wishlisted leaf shows the marker.
 - **Done when:** tests green.
 
-#### T19 · Breeds page, list and URL expansion · `task/19-breeds-page`
+#### T17 · Breeds page, list and URL expansion · `task/17-breeds-page`
 - **Scope:** `BreedList` and `BreedsPage`: loading/failed states with `ApiStatus` and retry, render rows, resolve the expanded leaf from the URL params, toggle by `navigate` (push), keep the query string, scroll the expanded row into view, red `source: 'route'` pop-up for an unknown element, cleared on URL change (architecture sections 4–5, FR-D-1, 1a, 1b, 6, M-4).
 - **Tests (red first, `MemoryRouter`):** (1) 165 rows render, 99 with a tag and 66 without (acceptance 1); (2) clicking `afghan` navigates to `/breeds/hound/afghan`, clicking again returns to `/breeds`, `akita` gives `/breeds/akita`; (3) opening `/breeds/hound/afghan` directly shows that row expanded and no other; (4) `/breeds/hound/nothing` and `/breeds/hound` show the collapsed list and the red pop-up naming the element, which disappears on navigating away; (5) a failed list load shows Failed, the retry button, and the outage pop-up.
-- **Done when:** tests green. Row details are an empty placeholder until T20.
+- **Done when:** tests green. Row details are an empty placeholder until T18.
 
-#### T20 · Breed details · `task/20-breed-details`
+#### T18 · Breed details · `task/18-breed-details`
 - **Scope:** `BreedDetails`: name, tag, image via `useBreedImage`, per-image `ApiStatus`, failure message naming the breed with Retry (for a failed request and for `<img>` `onError`), alt text, Add to Pack and Add to Wishlist buttons with the "On wishlist" state (architecture 6.3, 8; FR-D-2 to D-5, P-1, W-1).
 - **Tests (red first):** (1) expanding shows the image for the right leaf and the Done status; (2) collapsing and re-expanding shows the same image URL; (3) a failed request shows `Couldn't load an image of Afghan (hound)` and Retry, and `<img>` `onError` shows the same message; (4) Add to Pack twice makes the count 2; (5) Add to Wishlist flips to "On wishlist" and a second click does not duplicate it.
 - **Done when:** tests green.
 
-#### T21 · Sort and filter toolbar · `task/21-breeds-toolbar`
+#### T19 · Sort and filter toolbar · `task/19-breeds-toolbar`
 - **Scope:** `BreedsToolbar`: filter input (debounced), sort toggle, count "N of 165", clear button, "no breeds match" message, list `ApiStatus` badge, disabled while loading/failed; query-string state with `replace` navigation; a deep-linked leaf hidden by the filter stays visible (architecture 5A, FR-M-5 to M-8).
 - **Tests (red first):** (1) typing narrows the list and sets `?q=`; (2) the sort toggle reverses the order and sets `?sort=desc`; defaults are omitted from the URL; (3) opening `/breeds?q=ha&sort=desc` applies both; (4) expanding a row keeps `?q=&sort=`; (5) a filter with no results shows the message and the clear button restores the list; (6) an expanded leaf hidden by the filter stays visible.
 - **Done when:** tests green. **Milestone v0.3 gate.**
@@ -166,32 +156,32 @@ Test files live in `tests/`, named after the unit (e.g. `tests/leaf.test.ts`). "
 
 ### Milestone v0.4 — Collections
 
-#### T22 · Pack page · `task/22-pack-page`
-- **Scope:** `PackPage`: one row per leaf with its count and tag (sub-breeds only), remove-one button, empty state with a link to `/breeds`, "No longer available" row with remove for IDs missing from the API (FR-P-2 to P-4, U-7).
+#### T20 · Pack page · `task/20-pack-page`
+- **Scope:** `PackPage`: one row per leaf with its count and tag (sub-breeds only), remove-one button, empty state with a link to `/breeds`, "No longer available" row with remove for IDs missing from the API (FR-P-2 to P-4, U-3).
 - **Tests (red first):** (1) a leaf added three times shows one row with a count of 3; (2) remove lowers the count and the row disappears at zero; (3) the empty state links to `/breeds`; (4) an unknown stored ID shows "No longer available" with a working remove and makes no image request.
 - **Done when:** tests green.
 
-#### T23 · Wishlist page · `task/23-wishlist-page`
-- **Scope:** `WishlistPage`: list of wishlisted leaves with tag (sub-breeds only), remove, empty state with a link to `/breeds`, "No longer available" handling (FR-W-2, W-3, U-7).
+#### T21 · Wishlist page · `task/21-wishlist-page`
+- **Scope:** `WishlistPage`: list of wishlisted leaves with tag (sub-breeds only), remove, empty state with a link to `/breeds`, "No longer available" handling (FR-W-2, W-3, U-3).
 - **Tests (red first):** (1) wishlisted leaves are listed; (2) remove deletes the entry; (3) the empty state links to `/breeds`; (4) an unknown stored ID shows "No longer available" with remove; (5) a leaf may appear on both pages independently.
 - **Done when:** tests green.
 
-#### T24 · Storage-unavailable banner · `task/24-storage-banner`
-- **Scope:** the banner in `AppLayout` when `isStorageAvailable()` is false, and the in-memory fallback in the providers (architecture 7.4, FR-U-8).
-- **Tests (red first):** (1) with throwing storage the banner appears; (2) the app still works in memory (creating a profile and adding to the Pack succeeds); (3) with working storage there is no banner.
+#### T22 · Storage-unavailable banner · `task/22-storage-banner`
+- **Scope:** the banner in `AppLayout` when `isStorageAvailable()` is false, and the in-memory fallback in the collection provider (architecture 7.3, FR-U-4).
+- **Tests (red first):** (1) with throwing storage the banner appears; (2) the app still works in memory (adding to the Pack and the Wishlist succeeds); (3) with working storage there is no banner.
 - **Done when:** tests green. **Milestone v0.4 gate.**
 
 ---
 
 ### Milestone v1.0 — Release candidate
 
-#### T25 · Narrow-screen verification and fixes · `task/25-responsive-pass`
+#### T23 · Narrow-screen verification and fixes · `task/23-responsive-pass`
 - **Type:** verification task; the layout is CSS and cannot be tested in jsdom (architecture 10.2). There is no new feature.
 - **Scope:** check every page at 320, 375, 768 and desktop widths in the browser's responsive mode against architecture 8.1 and PRD acceptance 11: no horizontal scroll, 44 px tap targets, sidebar drawer behaviour, pop-up fits the screen, images scale. Fix layout defects found, in CSS only.
 - **Checks (instead of red tests):** a written checklist of each page × width, reported to you with pass/fail. Existing tests stay green.
 - **Done when:** the checklist is all pass and you have seen it.
 
-#### T26 · Template cleanup and acceptance walkthrough · `task/26-cleanup-acceptance`
+#### T24 · Template cleanup and acceptance walkthrough · `task/24-cleanup-acceptance`
 - **Scope:** remove unused Vite template leftovers (`App.css`, unused assets, template text), confirm no `any`, no `new Promise`/`.then` and no unused dependency. Walk through acceptance criteria 1–12 of the PRD and report each with evidence. No new features.
 - **Tests:** none new; `npm test` (at least 5 tests), `npm run lint` and `npm run build` must pass.
 - **Done when:** every acceptance criterion is reported as met, or the gaps are listed for your decision. **Milestone v1.0 gate.**
@@ -210,10 +200,10 @@ The 12 tests required by `architecture.md` section 10.2 are all covered by the t
 | 3 filter and sort | T06 |
 | 4 reducer | T08 |
 | 5 storage | T07 |
-| 6 tags | T19 |
-| 7 expansion and URL | T19 |
-| 8 image failure and pop-up | T12, T20 |
-| 9 unknown URL pop-up | T19 |
-| 10 filter and sort UI | T21 |
-| 11 pack count and wishlist button | T20, T22 |
+| 6 tags | T17 |
+| 7 expansion and URL | T17 |
+| 8 image failure and pop-up | T12, T18 |
+| 9 unknown URL pop-up | T17 |
+| 10 filter and sort UI | T19 |
+| 11 pack count and wishlist button | T18, T20 |
 | 12 sidebar toggle | T14 |

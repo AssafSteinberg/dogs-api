@@ -1,11 +1,11 @@
 # PRD — Dog Breed Explorer (master-detail app)
 
-Status: Draft v3 (in sync with `architecture.md` Draft v2) · Date: 2026-11-05
+Status: Draft v4 (in sync with `architecture.md` Draft v3) · Date: 2026-11-05
 Technical decisions (structure, state, data flow) are documented separately in `architecture.md`.
 
 ## 1. Overview
 
-A client-side web app for dog hobbyists to explore dog breeds and sub-breeds, build a personal **Pack** (the dogs they have or like) and keep a **Wishlist** of breeds they want. All data comes from the free Dog CEO API. Everything a user creates is saved per user across sessions, with no login and no backend.
+A client-side web app for dog hobbyists to explore dog breeds and sub-breeds, build a personal **Pack** (the dogs they have or like) and keep a **Wishlist** of breeds they want. All data comes from the free Dog CEO API. The Pack and Wishlist are saved in the browser across sessions, with no login, no user profiles and no backend.
 
 > Project history: the app was first planned around ChickenAPI. It was dropped because that API sends no CORS headers and the project does not allow a proxy or backend workaround. Dog CEO was verified to work from a browser (see section 5).
 
@@ -15,7 +15,7 @@ A client-side web app for dog hobbyists to explore dog breeds and sub-breeds, bu
 - Browse every breed and sub-breed in a single master list.
 - Expand and collapse an item in place to see its details, with the expanded item reflected in the URL (deep-linkable, working back/forward buttons).
 - Build a Pack (the same sub-breed may be added more than once) and a Wishlist.
-- Keep each user's Pack and Wishlist between sessions.
+- Keep the Pack and Wishlist between sessions (saved in this browser).
 - Navigate with links in a sidebar.
 - Sort the breed list by breed name and filter it by name.
 - Stay usable on narrow screens, with a collapsible sidebar.
@@ -23,14 +23,14 @@ A client-side web app for dog hobbyists to explore dog breeds and sub-breeds, bu
 
 ### Non-goals (out of scope for v1)
 - Filtering by anything other than name, sorting by anything other than breed name, and server-side search.
-- Login, passwords, sync between devices, or any backend or proxy.
+- Login, passwords, user profiles or accounts, sync between devices, or any backend or proxy.
 - Breed information beyond what the API provides (origin, temperament, size and so on).
 - Editing or submitting breed data.
 - A separate detail page: details are always shown inline in the master list, even when opened through a URL.
 
 ## 3. Target users
 
-Dog enthusiasts and hobbyists who like exploring the variety of breeds and building a personal collection of the ones they keep, like or want. No expertise is assumed. Several people may share one browser (a household), so profiles are supported.
+Dog enthusiasts and hobbyists who like exploring the variety of breeds and building a personal collection of the ones they keep, like or want. No expertise is assumed.
 
 ## 4. Scope and requirements
 
@@ -44,9 +44,8 @@ Dog enthusiasts and hobbyists who like exploring the variety of breeds and build
 
 - **FR-NAV-0** Routing uses **React Router**. `/` redirects to `/breeds`. The two `/breeds/...` routes render the same master page. Examples: `/breeds/akita` (breed without sub-breeds) and `/breeds/hound/afghan` (sub-breed).
 - **FR-NAV-1** A persistent sidebar contains links to the three pages and marks the active one.
-- **FR-NAV-2** The sidebar also shows the current profile and a way to switch or create profiles (see 4.5).
-- **FR-NAV-3** Pack and Wishlist are separate pages, not panels on the master page.
-- **FR-NAV-4** The sidebar is **collapsible** and **expanded by default** on every screen size. Collapsed on a wide screen it shrinks to an icon rail. On a narrow screen it opens as a drawer over the content and closes when a link is chosen, on `Escape`, or on a tap outside it.
+- **FR-NAV-2** Pack and Wishlist are separate pages, not panels on the master page.
+- **FR-NAV-3** The sidebar is **collapsible** and **expanded by default** on every screen size. Collapsed on a wide screen it shrinks to an icon rail. On a narrow screen it opens as a drawer over the content and closes when a link is chosen, on `Escape`, or on a tap outside it.
 
 ### 4.2 Master list (Breeds page)
 - **FR-M-1** One list element per **leaf**: each sub-breed of a breed that has sub-breeds, and each breed that has none. With the current API data this is 165 elements (99 sub-breeds plus 66 breeds without sub-breeds).
@@ -87,15 +86,12 @@ Dog enthusiasts and hobbyists who like exploring the variety of breeds and build
 
 Pack and Wishlist are independent: a breed may be in both.
 
-### 4.5 Profiles and persistence
-- **FR-U-1** On first visit the user creates a profile by entering a name. No password. A name is 1–30 characters after trimming and must be unique ignoring case. If the visit was through a deep link (e.g. `/breeds/hound/afghan`), the user lands on that link once the profile exists.
-- **FR-U-2** A user can switch between existing profiles and create new ones from the sidebar.
-- **FR-U-3** Each profile's Pack and Wishlist are saved in the browser (`localStorage`) and restored on the next visit.
-- **FR-U-4** The last-used profile is selected automatically on return.
-- **FR-U-5** Only identifiers (breed and sub-breed keys) are stored, not images or API data.
-- **FR-U-6** Profiles are local to one browser and are not private. This is stated in the UI.
-- **FR-U-7** If stored data is missing, unreadable or refers to a (sub-)breed the API no longer returns, the app recovers without crashing: unreadable data is reset to empty, and an unknown entry is shown as "No longer available" with a remove button.
-- **FR-U-8** If the browser blocks storage entirely, the app keeps working for the visit and shows a banner saying the Pack and Wishlist will not be saved.
+### 4.5 Persistence
+There are no user profiles or sign-in: the app opens straight onto the Breeds page, and whoever uses the browser sees the same Pack and Wishlist.
+- **FR-U-1** The Pack and Wishlist are saved in the browser (`localStorage`) and restored on the next visit.
+- **FR-U-2** Only identifiers (breed and sub-breed keys) are stored, not images or API data.
+- **FR-U-3** If stored data is missing, unreadable or refers to a (sub-)breed the API no longer returns, the app recovers without crashing: unreadable data is reset to empty, and an unknown entry is shown as "No longer available" with a remove button.
+- **FR-U-4** If the browser blocks storage entirely, the app keeps working for the visit and shows a banner saying the Pack and Wishlist will not be saved.
 
 ## 5. Data source: Dog CEO API
 
@@ -124,7 +120,7 @@ Limitations that shape the product:
 - **Performance:** the master list renders 165 elements without noticeable lag; images are fetched only on expand and shown lazily.
 - **Resilience:** network failures show a message and a retry; they never leave a blank page.
 - **Accessibility:** semantic landmarks (nav, main), keyboard operation of the sidebar, expand/collapse (with `aria-expanded`) and all buttons, alt text on images, visible focus, API status and pop-ups announced to assistive technology (`role="status"` / `role="alert"`).
-- **Responsive:** fully usable from 320 px wide up, with no horizontal page scroll, tap targets of at least 44 × 44 px, and the pop-up fitting the screen width; the sidebar is collapsible (FR-NAV-4).
+- **Responsive:** fully usable from 320 px wide up, with no horizontal page scroll, tap targets of at least 44 × 44 px, and the pop-up fitting the screen width; the sidebar is collapsible (FR-NAV-3).
 - **Hosting:** the app uses browser-history URLs, so the production host must serve `index.html` for unknown paths (no server code is needed).
 - **Code style:** asynchronous code uses `async`/`await` only (no explicit promise construction or `.then()` chains).
 - **Testing:** `npm test` runs automated logic and UI tests (Vitest, with `@vitest/ui` available for inspection). At least 5 tests must pass for each version or deployment milestone.
@@ -136,7 +132,7 @@ Limitations that shape the product:
 2. Expanding an element shows a random image of that sub-breed (or breed) and the two action buttons; collapsing hides it; re-expanding shows the same image.
 3. The URL follows the expansion: expanding `afghan` gives `/breeds/hound/afghan`, expanding `akita` gives `/breeds/akita`, collapsing returns to `/breeds`. Loading either URL directly (or reloading) shows that element expanded, and the browser back button reverses the last expansion.
 4. Adding the same sub-breed to the Pack three times results in one Pack row with a count of 3; removing lowers it by one; the Wishlist only ever holds it once.
-5. After a full browser restart, the same profile shows the same Pack and Wishlist; a second profile sees its own.
+5. After a full browser restart, the Pack and Wishlist are exactly as they were left.
 6. Breeds, Pack and Wishlist are reachable by sidebar links, with the active page marked.
 7. With the network offline, the app shows the Failed status and an error with retry on both the list and the images, and the image error names the breed.
 8. `tsc` and the linter pass with no errors, and the app contains no `any`.
@@ -154,7 +150,7 @@ Limitations that shape the product:
 | 4 | Should the Pack and Wishlist pages show the sub-breed image? | Not required for v1; would cost one image request per entry |
 | 5 | A "new random image" button on the details | Out of scope for v1 |
 | 6 | The API is community-run with no SLA and may change or be unavailable | Defensive parsing, error states, `localStorage` holds IDs only |
-| 7 | `localStorage` can be cleared by the user or blocked in private browsing | Recover gracefully (FR-U-7), tell the user (FR-U-8) |
+| 7 | `localStorage` can be cleared by the user or blocked in private browsing | Recover gracefully (FR-U-3), tell the user (FR-U-4) |
 | 8 | The production host is not chosen and must rewrite unknown paths to `index.html` | Decide before the first deployment milestone |
 
 ## 9. Next steps

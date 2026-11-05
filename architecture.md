@@ -1,6 +1,6 @@
 # Architecture — Dog Breed Explorer
 
-Status: Draft v2 (in sync with `PRD.md` Draft v3) · Date: 2026-11-05 · Companion to `PRD.md` (requirement IDs such as FR-D-1a refer to it).
+Status: Draft v3 (in sync with `PRD.md` Draft v4) · Date: 2026-11-05 · Companion to `PRD.md` (requirement IDs such as FR-D-1a refer to it).
 
 This document records the key implementation decisions. Items marked **[Decision]** were chosen here and are open to change before `tasks.md` is written.
 
@@ -41,7 +41,7 @@ interface Leaf {
 ```
 
 - **The LeafId is also the URL path and the API path.** `hound/afghan` maps to `/breeds/hound/afghan` in the app and `/breed/hound/afghan/images/random` in the API; `akita` maps to `/breeds/akita` and `/breed/akita/images/random`. One identifier, three uses.
-- The same ID is what the Pack and Wishlist store (PRD FR-U-5).
+- The same ID is what the Pack and Wishlist store (PRD FR-U-2).
 - **Display:** the name is the capitalised `sub` (or `breed` when `sub` is null) and the **tag** is the capitalised `breed`, shown only when `sub !== null` (FR-M-2). Display strings are derived in one module, never stored.
 - Brand helpers (`toLeafId`, `parseLeafId`) are the only place that builds or splits a `LeafId`.
 
@@ -55,7 +55,7 @@ src/
   main.tsx                      createRoot + <BrowserRouter>
   app/
     App.tsx                     providers + routes
-    AppLayout.tsx               sidebar + <Outlet/>, profile gate
+    AppLayout.tsx               sidebar + <Outlet/>, banners
   api/
     dogApi.ts                   fetchBreedList(), fetchRandomImage(leaf)
     guards.ts                   parseBreedList(unknown), parseImageResponse(unknown)
@@ -64,8 +64,7 @@ src/
     leaf.ts                     Leaf, LeafId, flattenBreeds, display helpers
   state/
     storage.ts                  safe localStorage read/write + schema versioning
-    profiles.tsx                ProfilesProvider (profile list, active profile)
-    collection.tsx              CollectionProvider (pack + wishlist for the active profile)
+    collection.tsx              CollectionProvider (pack + wishlist)
     reducer.ts                  pure reducer + actions
     notifications.tsx           NotificationsProvider + useNotify() (red pop-ups)
   features/
@@ -80,9 +79,6 @@ src/
       useBreedImage.ts          per-leaf image hook with session cache
     pack/PackPage.tsx
     wishlist/WishlistPage.tsx
-    profiles/
-      ProfileSwitcher.tsx
-      CreateProfileForm.tsx
   components/
     Sidebar.tsx                 collapsible nav
     Tag.tsx
@@ -168,7 +164,7 @@ A toolbar above the list (`BreedsToolbar`) has a **filter text box** and a **sor
 ### 6.3 Random image (`useBreedImage`)
 - A module-level `Map<LeafId, string>` holds resolved URLs for the session; a second `Map<LeafId, Promise<string>>` de-duplicates in-flight requests (the stored value is the promise returned by the `async` fetch function, which is awaited by every caller). Together they satisfy FR-D-4: the first expand fetches, later expands reuse the same image, and a double effect run does not fetch twice.
 - Hook state: `{ status: 'loading' | 'failed' | 'done', url, retry }`. A failed fetch is *not* cached, so retry makes a new request (FR-D-5).
-- The cache is intentionally in memory only: a page reload gives a new random image, and no image data is ever stored (FR-U-5).
+- The cache is intentionally in memory only: a page reload gives a new random image, and no image data is ever stored (FR-U-2).
 - **Failure messages name the breed.** Both failure paths, the API request failing and the `<img>` `onError` (the URL resolved but the file would not load), show the same message built from the display name: `Couldn't load an image of Afghan (hound)` for a sub-breed, or `Couldn't load an image of Akita` for a breed without sub-breeds, with a Retry button. The `<img>` `alt` text uses the same name.
 
 ### 6.4 API call status indicator (FR-D-8)
@@ -193,31 +189,26 @@ A toolbar above the list (`BreedsToolbar`) has a **filter text box** and a **sor
 ## 7. Application state and persistence
 
 ### 7.1 Stored shape
-Two kinds of `localStorage` keys, all prefixed with a schema version:
+One `localStorage` key, prefixed with a schema version. There are no user profiles: the collection belongs to the browser.
 
 ```
-dogs-api:v1:profiles          → { activeId: string | null, profiles: { id: string, name: string }[] }
-dogs-api:v1:collection:<id>   → { pack: Record<LeafId, number>, wishlist: LeafId[] }
+dogs-api:v1:collection   → { pack: Record<LeafId, number>, wishlist: LeafId[] }
 ```
 
 - `pack` is a **count per leaf**, not a list of entries **[Decision]**. This resolves PRD open question #3: the Pack page shows one row per leaf with its count, and "remove" decrements by one (FR-P-2, FR-P-3). Counts are integers ≥ 1; a count reaching 0 deletes the key.
 - `wishlist` is an array used as an ordered set: adding an existing ID is a no-op (FR-W-1).
-- Profile IDs come from `crypto.randomUUID()`. Names are trimmed, 1–30 characters, and unique ignoring case (FR-U-1).
 - Pack and Wishlist are independent: a leaf may be in both.
 
-### 7.2 Providers
-- `ProfilesProvider` holds the profile list and active profile; it writes `dogs-api:v1:profiles` whenever they change. Actions: `createProfile(name)`, `switchProfile(id)`.
-- `CollectionProvider` sits below it and loads `collection:<activeId>` whenever the active profile changes. It uses a pure reducer (`state/reducer.ts`) with actions `addToPack(id)`, `removeFromPack(id)`, `addToWishlist(id)`, `removeFromWishlist(id)`, and writes through to storage after each change.
-- Components read through narrow hooks (`usePack()`, `useWishlist()`, `useProfiles()`), not the raw context.
+### 7.2 Provider
+- `CollectionProvider` loads `dogs-api:v1:collection` once on mount. It uses a pure reducer (`state/reducer.ts`) with actions `addToPack(id)`, `removeFromPack(id)`, `addToWishlist(id)`, `removeFromWishlist(id)`, and writes through to storage after each change (FR-U-1).
+- Components read through narrow hooks (`usePack()`, `useWishlist()`), not the raw context.
+- There is no sign-in step or gate: the app renders the requested URL immediately, so deep links always work.
 
-### 7.3 Profile gate (FR-U-1, U-4)
-`AppLayout` renders `CreateProfileForm` instead of the `<Outlet/>` when there is no active profile. With an active profile stored, it restores it silently. The sidebar's `ProfileSwitcher` lists profiles and offers "New profile". Deep links work for returning users; a first-time visitor to `/breeds/hound/afghan` creates a profile first and then lands on that URL (the URL is preserved while the form is shown).
-
-### 7.4 Storage safety (FR-U-7, FR-U-8)
+### 7.3 Storage safety (FR-U-3, FR-U-4)
 `state/storage.ts` is the only code that touches `localStorage`:
 - Every read and write is in `try/catch` (blocked storage, quota, private mode).
 - Reads parse JSON as `unknown` and run guards. Invalid or unknown-version data is discarded and replaced with an empty value, never partially trusted.
-- If storage is unavailable, the providers fall back to in-memory state and the UI shows a banner: "Your pack won't be saved in this browser" (PRD risk #7).
+- If storage is unavailable, the provider falls back to in-memory state and the UI shows a banner: "Your pack won't be saved in this browser" (PRD risk #7).
 - A stored ID that is no longer in the breed index is kept in storage but rendered on its page as "No longer available" with a remove button; it is never passed to the image API.
 - Cross-tab live sync via the `storage` event is out of scope; the other tab sees changes on its next load.
 
@@ -225,8 +216,8 @@ dogs-api:v1:collection:<id>   → { pack: Record<LeafId, number>, wishlist: Leaf
 
 | Component | Responsibility |
 |---|---|
-| `AppLayout` | Profile gate, sidebar, `<main>` landmark, storage-unavailable banner |
-| `Sidebar` | `<nav>` with `NavLink`s to Breeds, Pack, Wishlist; hosts `ProfileSwitcher`; collapsible (8.1) |
+| `AppLayout` | Sidebar, `<main>` landmark, storage-unavailable banner |
+| `Sidebar` | `<nav>` with `NavLink`s to Breeds, Pack, Wishlist; collapsible (8.1) |
 | `BreedsPage` | Waits for the list, resolves the expanded leaf from the URL, applies filter/sort (5A), raises the not-found pop-up |
 | `BreedsToolbar` | Filter box, sort toggle, result count, breed-list `ApiStatus` badge |
 | `BreedList` / `BreedItem` | Renders the rows; the toggle button; the `Tag` when `sub !== null` |
@@ -239,7 +230,7 @@ dogs-api:v1:collection:<id>   → { pack: Record<LeafId, number>, wishlist: Leaf
 - **Performance:** 165 plain rows need no virtualisation. `BreedItem` is memoised and receives only primitive props plus an `expanded` boolean, so a URL change re-renders two rows, not 165.
 - **Accessibility:** disclosure pattern (`button` with `aria-expanded` and `aria-controls` pointing at the details region), `<nav>`/`<main>` landmarks, `alt` text built from the display name, visible focus styles, and focus stays on the toggle after expand/collapse (FR-D-7). The image area reserves its size to avoid layout shift.
 
-### 8.1 Layout and narrow screens (FR-NAV-4)
+### 8.1 Layout and narrow screens (FR-NAV-3)
 The app must be fully usable from about 320 px wide up.
 
 - **Layout:** a CSS grid with two areas, sidebar and main. Wide screens (above 768 px) show the sidebar as a column beside the content. Narrow screens (768 px and below) turn the sidebar into an **overlay drawer** over the content, with a slim top bar that holds the toggle button and the app name.
@@ -257,7 +248,7 @@ The app must be fully usable from about 320 px wide up.
 | Breed list request fails | `ApiStatus` shows Failed; page-level error with Retry; red pop-up (6.5); sidebar and other pages stay usable |
 | Image request or file fails | `ApiStatus` shows Failed; error inside that row's details naming the breed, with Retry (6.3); red pop-up if the API is unreachable (6.5); list unaffected |
 | URL names an unknown leaf | Collapsed list + red pop-up naming the missing element, same component as 6.5 (FR-D-1b) |
-| `localStorage` blocked or corrupt | In-memory fallback + banner; corrupt values reset (FR-U-7) |
+| `localStorage` blocked or corrupt | In-memory fallback + banner; corrupt values reset (FR-U-3) |
 | Stored ID missing from the API | Shown as "No longer available" with remove |
 | Request aborted (unmount / StrictMode) | Ignored silently |
 
