@@ -276,3 +276,9 @@
 **15:42 · claude**
 
 > Approve all. implement all the rest and finish the job.
+
+## 2026-11-05
+
+**18:04 · claude**
+
+> tag v1.0. remove isStorageAvailable code. I changed the favicon.
