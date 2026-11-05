@@ -1,6 +1,6 @@
 # PRD — Dog Breed Explorer (master-detail app)
 
-Status: Draft v1 · Date: 2026-11-05
+Status: Draft v3 (in sync with `architecture.md` Draft v2) · Date: 2026-11-05
 Technical decisions (structure, state, data flow) are documented separately in `architecture.md`.
 
 ## 1. Overview
@@ -17,9 +17,12 @@ A client-side web app for dog hobbyists to explore dog breeds and sub-breeds, bu
 - Build a Pack (the same sub-breed may be added more than once) and a Wishlist.
 - Keep each user's Pack and Wishlist between sessions.
 - Navigate with links in a sidebar.
+- Sort the breed list by breed name and filter it by name.
+- Stay usable on narrow screens, with a collapsible sidebar.
+- Always show the state of API calls and tell the user when the API cannot be reached.
 
 ### Non-goals (out of scope for v1)
-- Search, filtering and sorting of the breed list.
+- Filtering by anything other than name, sorting by anything other than breed name, and server-side search.
 - Login, passwords, sync between devices, or any backend or proxy.
 - Breed information beyond what the API provides (origin, temperament, size and so on).
 - Editing or submitting breed data.
@@ -43,29 +46,37 @@ Dog enthusiasts and hobbyists who like exploring the variety of breeds and build
 - **FR-NAV-1** A persistent sidebar contains links to the three pages and marks the active one.
 - **FR-NAV-2** The sidebar also shows the current profile and a way to switch or create profiles (see 4.5).
 - **FR-NAV-3** Pack and Wishlist are separate pages, not panels on the master page.
+- **FR-NAV-4** The sidebar is **collapsible** and **expanded by default** on every screen size. Collapsed on a wide screen it shrinks to an icon rail. On a narrow screen it opens as a drawer over the content and closes when a link is chosen, on `Escape`, or on a tap outside it.
 
 ### 4.2 Master list (Breeds page)
 - **FR-M-1** One list element per **leaf**: each sub-breed of a breed that has sub-breeds, and each breed that has none. With the current API data this is 165 elements (99 sub-breeds plus 66 breeds without sub-breeds).
 - **FR-M-2** Every element shows its display name. **Only sub-breed elements** also show a **breed tag** chip naming the breed they belong to (e.g. "afghan" tagged "hound"). An element for a breed without sub-breeds (e.g. "akita") has **no tag**.
-- **FR-M-3** Elements of the same breed are kept together (list ordered by breed, then sub-breed), so the tag chips group sub-breeds visually. There are no section headers.
+- **FR-M-3** Elements of the same breed are kept together (list ordered by breed, then sub-breed, in the chosen sort direction, see FR-M-5), so the tag chips group sub-breeds visually. There are no section headers.
 - **FR-M-4** The list loads from one request when the page opens, with a loading state and an error state with a retry action.
+- **FR-M-5** The user can **sort** the list by breed name, ascending or descending. Sub-breeds of one breed stay together and follow the same direction. Default: ascending.
+- **FR-M-6** The user can **filter** the list by name: a case-insensitive "contains" match on the breed name or the sub-breed name.
+- **FR-M-7** Sort and filter are reflected in the URL (query string, e.g. `?q=ha&sort=desc`) so a view can be shared and survives a reload. Expanding or collapsing an element keeps them. Typing in the filter or changing the sort does not add browser-history entries. The result count is shown (e.g. "12 of 165"), and an empty result shows a "no breeds match" message with a way to clear the filter. The controls are disabled while the list is loading or has failed.
+- **FR-M-8** An expanded element that is hidden by the filter (e.g. opened from a link) stays visible.
 
 ### 4.3 Details (inline expand and collapse)
 - **FR-D-1** Clicking an element expands its details in place; clicking again, or the close control, collapses it.
 - **FR-D-1a** Expanding an element updates the URL to that element's route (see 4.1); collapsing it returns the URL to `/breeds`. Opening such a URL directly, or reloading, shows the list with that element expanded (and scrolled into view). Back and forward move between expansion states.
-- **FR-D-1b** A URL naming an element that does not exist (e.g. `/breeds/hound/nothing`, or `/breeds/hound`, which is not an element because hound has sub-breeds) shows the collapsed list with a "not found" message and does not crash.
+- **FR-D-1b** A URL naming an element that does not exist (e.g. `/breeds/hound/nothing`, or `/breeds/hound`, which is not an element because hound has sub-breeds) shows the collapsed list and a red pop-up at the bottom of the screen naming the missing element, and does not crash.
 - **FR-D-2** The details show one **random image** of that sub-breed (or of the breed, if it has no sub-breeds), fetched from the matching Dog CEO endpoint when the element is first expanded.
 - **FR-D-3** The details show the name, the breed tag (sub-breeds only, per FR-M-2) and the action buttons: **Add to Pack** and **Add to Wishlist**.
 - **FR-D-4** The image is fetched on first expand only and kept for the rest of the session, so collapsing and re-expanding shows the same image.
-- **FR-D-5** The image has its own loading and error state with a retry action. A failed image never breaks the list.
+- **FR-D-5** The image has its own loading and failure state with a retry action. A failure message names the breed or sub-breed (e.g. "Couldn't load an image of Afghan (hound)"). A failed image never breaks the list.
 - **FR-D-6** Only **one** element is expanded at a time, because the URL names a single element. Expanding another collapses the current one.
 - **FR-D-7** Expansion is fully keyboard-accessible.
+- **FR-D-8** Every API call (the breed list, and each image) shows a visible status: **Loading**, **Failed** or **Done**. Each state has an icon and a text label, not colour alone, and is announced to assistive technology.
+- **FR-D-9** When the API cannot be reached (no connection, a server error, or an unusable response), a **red pop-up at the bottom of the screen** tells the user. Repeated failures show one pop-up. It can be dismissed, and it clears itself when a later API call succeeds. A "breed not found" (404) for a single image is not an outage and gets only the inline message from FR-D-5.
+- **FR-D-10** The red pop-up from FR-D-1b (unknown URL) is the same pop-up component; it clears when the URL changes.
 
 ### 4.4 Pack and Wishlist
 **My Pack**
 - **FR-P-1** From an element's details, the user can add that (sub-)breed to the Pack **any number of times**; the same sub-breed can appear several times.
-- **FR-P-2** The Pack page lists the entries the user added, shows the breed tag on sub-breed entries (none for breeds without sub-breeds), and shows a count per (sub-)breed when it was added more than once. *(Per-entry or grouped display is an `architecture.md` decision; both satisfy this requirement.)*
-- **FR-P-3** The user can remove an entry (one at a time) from the Pack page.
+- **FR-P-2** The Pack page shows **one row per (sub-)breed with a count** (e.g. "Afghan × 3"), with the breed tag on sub-breed rows (none for breeds without sub-breeds).
+- **FR-P-3** The user can remove from the Pack page one at a time: each removal lowers the count by one, and the row disappears when the count reaches zero.
 - **FR-P-4** The Pack page shows an empty state with a link to the Breeds page.
 
 **Wishlist**
@@ -77,13 +88,14 @@ Dog enthusiasts and hobbyists who like exploring the variety of breeds and build
 Pack and Wishlist are independent: a breed may be in both.
 
 ### 4.5 Profiles and persistence
-- **FR-U-1** On first visit the user creates a profile by entering a name. No password.
+- **FR-U-1** On first visit the user creates a profile by entering a name. No password. A name is 1–30 characters after trimming and must be unique ignoring case. If the visit was through a deep link (e.g. `/breeds/hound/afghan`), the user lands on that link once the profile exists.
 - **FR-U-2** A user can switch between existing profiles and create new ones from the sidebar.
 - **FR-U-3** Each profile's Pack and Wishlist are saved in the browser (`localStorage`) and restored on the next visit.
 - **FR-U-4** The last-used profile is selected automatically on return.
 - **FR-U-5** Only identifiers (breed and sub-breed keys) are stored, not images or API data.
 - **FR-U-6** Profiles are local to one browser and are not private. This is stated in the UI.
-- **FR-U-7** If stored data is missing, unreadable or refers to a (sub-)breed the API no longer returns, the app recovers without crashing (empty data, or the unknown entry shown as unavailable).
+- **FR-U-7** If stored data is missing, unreadable or refers to a (sub-)breed the API no longer returns, the app recovers without crashing: unreadable data is reset to empty, and an unknown entry is shown as "No longer available" with a remove button.
+- **FR-U-8** If the browser blocks storage entirely, the app keeps working for the visit and shows a banner saying the Pack and Wishlist will not be saved.
 
 ## 5. Data source: Dog CEO API
 
@@ -105,14 +117,17 @@ Limitations that shape the product:
 - The API provides **names and images only**. There is no description, origin, temperament or size, so the details view is intentionally small.
 - Using `/breed/{breed}/images/random` for a breed that **has** sub-breeds returns an image of a random sub-breed. The app must therefore always use the sub-breed endpoint for sub-breeds.
 - The random image is different on every request; consistency comes from fetching once per session (FR-D-4).
-- Names are lowercase API keys. The display format (capitalisation, e.g. "Afghan hound") is decided in `architecture.md`.
+- Names are lowercase API keys. For display, the element name is the capitalised sub-breed (or breed, when it has no sub-breeds), and the tag is the capitalised breed: "Afghan" tagged "Hound", "Akita" with no tag.
 
 ## 6. Non-functional requirements
 - **Language and stack:** React + Vite + React Router, **strictly TypeScript** (no `any`; API responses are typed and validated at the boundary).
 - **Performance:** the master list renders 165 elements without noticeable lag; images are fetched only on expand and shown lazily.
 - **Resilience:** network failures show a message and a retry; they never leave a blank page.
-- **Accessibility:** semantic landmarks (nav, main), keyboard operation of the sidebar, expand/collapse (with `aria-expanded`) and all buttons, alt text on images, visible focus.
-- **Responsive:** usable on desktop and mobile widths (the sidebar can collapse on narrow screens).
+- **Accessibility:** semantic landmarks (nav, main), keyboard operation of the sidebar, expand/collapse (with `aria-expanded`) and all buttons, alt text on images, visible focus, API status and pop-ups announced to assistive technology (`role="status"` / `role="alert"`).
+- **Responsive:** fully usable from 320 px wide up, with no horizontal page scroll, tap targets of at least 44 × 44 px, and the pop-up fitting the screen width; the sidebar is collapsible (FR-NAV-4).
+- **Hosting:** the app uses browser-history URLs, so the production host must serve `index.html` for unknown paths (no server code is needed).
+- **Code style:** asynchronous code uses `async`/`await` only (no explicit promise construction or `.then()` chains).
+- **Testing:** `npm test` runs automated logic and UI tests (Vitest, with `@vitest/ui` available for inspection). At least 5 tests must pass for each version or deployment milestone.
 - **Browser support:** current evergreen browsers.
 - **Privacy:** no personal data leaves the device; the only network calls are to `dog.ceo` and `images.dog.ceo`.
 
@@ -120,24 +135,28 @@ Limitations that shape the product:
 1. The Breeds page lists 165 elements from one API call: the 99 sub-breed elements each carry a breed tag, and the 66 elements for breeds without sub-breeds have none.
 2. Expanding an element shows a random image of that sub-breed (or breed) and the two action buttons; collapsing hides it; re-expanding shows the same image.
 3. The URL follows the expansion: expanding `afghan` gives `/breeds/hound/afghan`, expanding `akita` gives `/breeds/akita`, collapsing returns to `/breeds`. Loading either URL directly (or reloading) shows that element expanded, and the browser back button reverses the last expansion.
-4. Adding the same sub-breed to the Pack three times results in three Pack entries (or a count of 3); the Wishlist only ever holds it once.
+4. Adding the same sub-breed to the Pack three times results in one Pack row with a count of 3; removing lowers it by one; the Wishlist only ever holds it once.
 5. After a full browser restart, the same profile shows the same Pack and Wishlist; a second profile sees its own.
 6. Breeds, Pack and Wishlist are reachable by sidebar links, with the active page marked.
-7. With the network offline, the app shows error states with retry on both the list and the images.
+7. With the network offline, the app shows the Failed status and an error with retry on both the list and the images, and the image error names the breed.
 8. `tsc` and the linter pass with no errors, and the app contains no `any`.
+9. Typing in the filter narrows the list by breed or sub-breed name and the sort toggle reverses the order; both are visible in the URL and survive a reload.
+10. API calls show Loading, Failed or Done; with the network offline a red pop-up appears at the bottom of the screen, and an unknown URL raises a red pop-up naming the missing element.
+11. At 320 px width nothing overflows horizontally, and the sidebar can be collapsed and expanded (expanded on first load).
+12. `npm test` passes with at least 5 tests.
 
 ## 8. Open questions and risks
 | # | Item | Proposed handling |
 |---|---|---|
 | 1 | Details contain only a name and an image because of the API | Accepted for v1 |
-| 2 | The URL scheme (path-based, one expanded element, FR-D-6) | Assumed; a query-string scheme would allow several at once. Confirm |
-| 3 | Pack display: one row per entry vs grouped with a count (FR-P-2) | Decide in `architecture.md` |
+| 2 | The URL scheme (path-based, one expanded element, FR-D-6) | Adopted in `architecture.md` section 5; a query-string scheme would allow several at once. Revisit only on request |
+| 3 | Pack display: one row per entry vs grouped with a count (FR-P-2) | **Resolved:** grouped with a count (`architecture.md` 7.1) |
 | 4 | Should the Pack and Wishlist pages show the sub-breed image? | Not required for v1; would cost one image request per entry |
 | 5 | A "new random image" button on the details | Out of scope for v1 |
 | 6 | The API is community-run with no SLA and may change or be unavailable | Defensive parsing, error states, `localStorage` holds IDs only |
-| 7 | `localStorage` can be cleared by the user or blocked in private browsing | Recover gracefully (FR-U-7) and tell the user |
+| 7 | `localStorage` can be cleared by the user or blocked in private browsing | Recover gracefully (FR-U-7), tell the user (FR-U-8) |
+| 8 | The production host is not chosen and must rewrite unknown paths to `index.html` | Decide before the first deployment milestone |
 
 ## 9. Next steps
-1. Review and approve this PRD.
-2. Write `architecture.md` (project structure, types, state management, routing, API layer, persistence).
-3. Write `tasks.md`, an ordered task-by-task implementation plan, before any coding starts.
+1. Review and approve this PRD together with `architecture.md`.
+2. Write `tasks.md`, an ordered task-by-task implementation plan, before any coding starts.
