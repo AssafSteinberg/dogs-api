@@ -14,6 +14,8 @@ const akita = toLeafId('akita', null)
 
 beforeEach(() => {
   localStorage.clear()
+  // The warning for unavailable storage is checked in its own tests; keep the output of the others clean.
+  vi.spyOn(console, 'warn').mockImplementation(() => {})
 })
 
 afterEach(() => {
@@ -139,5 +141,84 @@ describe('isStorageAvailable', () => {
   it('is true for working storage and leaves nothing behind', () => {
     expect(isStorageAvailable()).toBe(true)
     expect(localStorage.length).toBe(0)
+  })
+})
+
+describe('console warning when storage cannot be used (FR-U-4)', () => {
+  // The warning is shown once per page load, which is state of the module, so each test gets a fresh one.
+  async function freshStorage() {
+    vi.resetModules()
+    return await import('../src/state/storage')
+  }
+
+  it('warns when reading is blocked', async () => {
+    const { loadCollection } = await freshStorage()
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new DOMException('denied', 'SecurityError')
+    })
+
+    loadCollection()
+
+    expect(console.warn).toHaveBeenCalledTimes(1)
+    expect(console.warn).toHaveBeenCalledWith(expect.stringMatching(/will not be saved/))
+  })
+
+  it('warns when writing is blocked or the storage is full', async () => {
+    const { saveCollection, emptyCollection } = await freshStorage()
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('quota', 'QuotaExceededError')
+    })
+
+    saveCollection(emptyCollection())
+
+    expect(console.warn).toHaveBeenCalledTimes(1)
+    expect(console.warn).toHaveBeenCalledWith(expect.stringMatching(/will not be saved/))
+  })
+
+  it('warns when window.localStorage itself throws', async () => {
+    const { loadCollection } = await freshStorage()
+    vi.spyOn(window, 'localStorage', 'get').mockImplementation(() => {
+      throw new DOMException('denied', 'SecurityError')
+    })
+
+    loadCollection()
+
+    expect(console.warn).toHaveBeenCalledTimes(1)
+  })
+
+  it('warns only once, however many reads and writes fail', async () => {
+    const { loadCollection, saveCollection, emptyCollection } = await freshStorage()
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new DOMException('denied', 'SecurityError')
+    })
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('denied', 'SecurityError')
+    })
+
+    loadCollection()
+    saveCollection(emptyCollection())
+    saveCollection(emptyCollection())
+
+    expect(console.warn).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not warn when storage works', async () => {
+    const { loadCollection, saveCollection } = await freshStorage()
+
+    saveCollection({ pack: { [akita]: 1 }, wishlist: [] })
+    loadCollection()
+
+    expect(console.warn).not.toHaveBeenCalled()
+  })
+
+  it('does not warn for stored data that is merely corrupt: storage itself works', async () => {
+    const { loadCollection } = await freshStorage()
+    localStorage.setItem(KEY, '{not json')
+
+    loadCollection()
+    localStorage.setItem(KEY, JSON.stringify({ pack: [], wishlist: {} }))
+    loadCollection()
+
+    expect(console.warn).not.toHaveBeenCalled()
   })
 })

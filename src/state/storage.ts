@@ -12,6 +12,15 @@ export interface Collection {
 const COLLECTION_KEY = 'dogs-api:v1:collection'
 const PROBE_KEY = 'dogs-api:probe'
 
+let warnedUnavailable = false
+
+/** Tells the console, once per page load, that nothing will be saved (FR-U-4). There is no on-screen banner. */
+function warnStorageUnavailable(): void {
+  if (warnedUnavailable) return
+  warnedUnavailable = true
+  console.warn('Dog Breed Explorer: browser storage is unavailable, so your Pack and Wishlist will not be saved.')
+}
+
 export function emptyCollection(): Collection {
   return { pack: {}, wishlist: [] }
 }
@@ -56,24 +65,39 @@ function parseCollection(value: unknown): Collection | null {
 /** The stored collection, or an empty one when nothing usable is stored. Never throws. */
 export function loadCollection(): Collection {
   const storage = getStorage()
-  if (storage === null) return emptyCollection()
+  if (storage === null) {
+    warnStorageUnavailable()
+    return emptyCollection()
+  }
+
+  let raw: string | null
   try {
-    const raw = storage.getItem(COLLECTION_KEY)
-    if (raw === null) return emptyCollection()
+    raw = storage.getItem(COLLECTION_KEY)
+  } catch {
+    warnStorageUnavailable()
+    return emptyCollection()
+  }
+  if (raw === null) return emptyCollection()
+
+  // Unreadable data is not an unavailable storage: start empty without a warning.
+  try {
     return parseCollection(JSON.parse(raw)) ?? emptyCollection()
   } catch {
     return emptyCollection()
   }
 }
 
-/** Stores the collection. Never throws; use isStorageAvailable() to tell the user it is not saved. */
+/** Stores the collection. Never throws; if it cannot, the app keeps working in memory and the console says so once. */
 export function saveCollection(collection: Collection): void {
   const storage = getStorage()
-  if (storage === null) return
+  if (storage === null) {
+    warnStorageUnavailable()
+    return
+  }
   try {
     storage.setItem(COLLECTION_KEY, JSON.stringify(collection))
   } catch {
-    // Blocked or full storage: the app keeps working in memory.
+    warnStorageUnavailable()
   }
 }
 

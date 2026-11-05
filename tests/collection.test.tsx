@@ -137,16 +137,18 @@ describe('empty or unreadable storage', () => {
     expect(stored()).toEqual({ pack: {}, wishlist: ['akita'] })
   })
 
-  it('keeps working in memory when the browser refuses to store (FR-U-4)', async () => {
+  it('keeps working in memory when the browser refuses to store, and says so in the console (FR-U-4)', async () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new DOMException('quota', 'QuotaExceededError')
     })
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const user = userEvent.setup()
     renderPanel()
 
     await user.click(screen.getByRole('button', { name: 'pack +afghan' }))
 
     expect(screen.getByTestId('pack')).toHaveTextContent('{"hound/afghan":1}')
+    expect(warn).toHaveBeenCalledWith(expect.stringMatching(/will not be saved/))
   })
 })
 
