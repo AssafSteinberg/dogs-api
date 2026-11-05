@@ -302,3 +302,13 @@
 **20:14 · claude**
 
 > Decisions - 1 - Unknown item URL - show a static 404 page, just text, nothing special.2 - No need to carry sort and filter params. 3 - accepted. 4 - change it to an h1. 5 - keep the tag. Given these answers implemented, plan approved. Execute all changes, Just halt before merging with master.
+
+## 2026-11-05
+
+**20:43 · claude**
+
+> remove unused pop-up code
+
+**20:49 · claude**
+
+> commit and merge with dev

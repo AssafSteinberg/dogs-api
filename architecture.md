@@ -179,10 +179,10 @@ A toolbar above the list (`BreedsToolbar`) has a **filter text box** and a **sor
 - The component is announced to assistive technology through `role="status"` (`aria-live="polite"`), so the three states are not only visual.
 
 ### 6.5 Unreachable-API notification (red pop-up) (FR-D-9)
-- `state/notifications.tsx` provides `NotificationsProvider` and `useNotify()`. A notification is `{ id, kind: 'error', source: 'api' | 'route', message }`.
+- `state/notifications.tsx` provides `NotificationsProvider` and `useNotify()`. A notification is `{ id, message }`, and the actions are `notify(message)`, `dismiss(id)` and `clear()`. Every notification is an API outage message, so there is nothing else to tell apart.
 - `Toast` renders the active notifications as a **red pop-up fixed to the bottom of the screen**, centred, full width minus a gutter on narrow screens. It has `role="alert"` and a dismiss (×) button, and it does not cover the sidebar toggle.
 - **When it fires:** when an API call fails with `kind: 'network'` (cannot reach the API), `'shape'` (unusable response) or an `'http'` status of 5xx. Message example: `Can't reach the dog.ceo API. Check your connection and try again.` An `'http'` 404 for one breed's image is *not* an outage; it shows only the inline message from 6.3.
-- Repeated failures are **de-duplicated** by message, so ten failing image calls show one pop-up. It stays until dismissed or, for `source: 'api'` only, until a later API call succeeds, which clears it. `source: 'route'` pop-ups clear when the URL changes.
+- Repeated failures are **de-duplicated** by message, so ten failing image calls show one pop-up. It stays until dismissed or until a later API call succeeds, which clears them all.
 
 ## 7. Application state and persistence
 
