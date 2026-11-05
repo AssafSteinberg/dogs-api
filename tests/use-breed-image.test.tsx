@@ -142,6 +142,23 @@ describe('useBreedImage: failure and retry (FR-D-5)', () => {
   })
 })
 
+describe('useBreedImage: retry for an image file that will not load (FR-D-5)', () => {
+  it('replaces the cached image with a freshly fetched one', async () => {
+    const dog = leaf('terrier', 'cairn')
+    fetchMock
+      .mockImplementationOnce(async () => imageResponse('https://images.dog.ceo/old.jpg'))
+      .mockImplementation(async () => imageResponse('https://images.dog.ceo/new.jpg'))
+    const { result } = renderImage(dog)
+    await waitFor(() => expect(result.current.url).toBe('https://images.dog.ceo/old.jpg'))
+
+    act(() => result.current.retry())
+
+    expect(result.current.status).toBe('loading')
+    await waitFor(() => expect(result.current.url).toBe('https://images.dog.ceo/new.jpg'))
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+})
+
 describe('useBreedImage: outage pop-up (FR-D-9)', () => {
   it('a 404 is failed but raises no pop-up', async () => {
     const dog = leaf('spaniel', 'nothing')

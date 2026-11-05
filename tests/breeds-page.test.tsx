@@ -39,18 +39,24 @@ function renderAt(url: string) {
   )
 }
 
-function listResponse(): Response {
-  return new Response(JSON.stringify(breedsFixture), {
+function json(body: unknown): Response {
+  return new Response(JSON.stringify(body), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
   })
+}
+
+/** The list for /breeds/list/all, and a picture for the image request of any expanded row. */
+async function respond(input: Parameters<typeof fetch>[0]): Promise<Response> {
+  if (String(input).endsWith('/breeds/list/all')) return json(breedsFixture)
+  return json({ status: 'success', message: 'https://images.dog.ceo/breeds/test/shot.jpg' })
 }
 
 const fetchMock = vi.fn<typeof fetch>()
 
 beforeEach(() => {
   localStorage.clear()
-  fetchMock.mockImplementation(async () => listResponse())
+  fetchMock.mockImplementation(respond)
   vi.stubGlobal('fetch', fetchMock)
 })
 
@@ -280,7 +286,8 @@ describe('performance (architecture 8)', () => {
 
     await user.click(row(/^Afghan\s*Hound/))
 
-    // Tag renders once per re-rendered sub-breed row; 99 rows have one.
-    expect(tagRenders.count - before).toBeLessThanOrEqual(2)
+    // Tag renders once per re-rendered sub-breed row, and the open details render it a few times
+    // too (first the name, then again when the image has loaded). The point: a handful, not 99.
+    expect(tagRenders.count - before).toBeLessThanOrEqual(4)
   })
 })
