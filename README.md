@@ -1,99 +1,111 @@
-# נקודת פתיחה לפרויקט הגמר · יומן פרומפטים אוטומטי
+# Dog Breed Explorer
 
-ב-repo הזה יש דבר אחד: **רישום אוטומטי של כל פרומפט שאתם שולחים לסוכן**, אל תוך `PROMPTS.md`.
-את האפליקציה אתם בונים בעצמכם, לפי הוראות הפרויקט.
+A small web app for dog lovers: browse every dog breed and sub-breed, look at a random photo of each, build a **Pack** of the dogs you keep or like, and keep a **Wishlist** of breeds you want.
 
-## מתחילים
+Built with React, Vite and strict TypeScript. All data comes from the free [Dog CEO API](https://dog.ceo/dog-api/documentation/). There is no backend and no login: your Pack and Wishlist are saved in your browser.
 
-**1 · יוצרים repo משלכם.** היכנסו ל-GitHub עם המשתמש שלכם, ופתחו את הקישור:
-**[יצירת repo חדש מהתבנית](https://github.com/new?template_name=react-project-starter&template_owner=YarivGilad)**.
-תנו לו שם, בחרו **Public**, ולחצו **Create repository**.
+## Overview
 
-אפשר גם מהעמוד הזה: כשאתם מחוברים ל-GitHub, בפינה הימנית העליונה מופיע הכפתור **Use this template** ← **Create a new repository**.
-בלי חיבור ל-GitHub הכפתור לא מופיע.
+**Who it is for.** Dog enthusiasts and hobbyists who like exploring the variety of breeds and building a personal collection of the ones they keep, like or want.
 
-<img src=".github/images/use-this-template.png" alt="Use this template → Create a new repository" width="300">
+**How it works.** It is a master-detail app:
 
-**2 · מורידים אותו למחשב.**
+| Page | Route | What it shows |
+|---|---|---|
+| Breeds (master) | `/breeds` | Every breed and sub-breed in one list. Each element expands in place to show its details. |
+| My Pack | `/pack` | The dogs you added, with how many of each. |
+| Wishlist | `/wishlist` | The breeds you want. |
+
+Pages are reached through links in a collapsible sidebar. The app is one page and all navigation is tracked by the URL (`/breeds/hound/afghan`), so every view can be bookmarked or shared.
+
+**Project documents.** For educational purposes, the app was designed and built from these, which are kept in the repository:
+
+- [`PRD.md`](PRD.md): what the product does and the acceptance criteria.
+- [`architecture.md`](architecture.md): how it is built and why.
+- [`tasks.md`](tasks.md): the task-by-task plan it was implemented from.
+
+## Key features
+
+- **Complete breed list.** 165 different breeds and sub-breeds. A sub-breed is shown by its full name ("Blood Hound") with a small tag for its breed ("Hound"); a breed without sub-breeds has no tag.
+- **Details in place.** Click an element to expand it: a random photo from the Dog CEO API, plus **Add to Pack** and **Add to Wishlist**. One element is open at a time. Re-opening it shows the same photo.
+- **The URL is the state.** `/breeds/hound/afghan` opens that element; reloading, sharing the link and the browser's back and forward buttons all work.
+- **Filter and sort.** Filter by breed or sub-breed name and sort A→Z or Z→A. Both are kept in the URL (`?q=hound&sort=desc`).
+- **Pack.** Add the same dog as many times as you like; the Pack page shows one row per dog with a count and lets you remove them one at a time.
+- **Wishlist.** Each breed can be on the list once. Remove entries from the Wishlist page.
+- **Saved between visits.** Both lists are stored in your browser (`localStorage`). Only ids and counts are stored, never images or API data. If a stored breed disappears from the API it is shown as "No longer available" so you can remove it.
+- **Always shows what the network is doing.** Every API call shows **Loading**, **Failed** or **Done**. A failed photo names the breed ("Couldn't load an image of Afghan Hound") and offers **Retry**. When the API cannot be reached, a red pop-up appears at the bottom of the screen.
+- **Works on narrow screens.** Usable from 320 px wide. The sidebar can be collapsed; on a phone it opens as a drawer over the page. Tap targets are at least 44 px.
+- **Accessible.** Keyboard operation throughout, `aria-expanded` on every toggle, status and alert announcements for screen readers, and alt text on photos.
+
+## How to run?
+
+**You need** [Node.js](https://nodejs.org/) 22.22 or newer (it was developed on Node 24) and npm. An internet connection is required, because the app calls the Dog CEO API directly from the browser.
 
 ```bash
-git clone https://github.com/<שם-המשתמש-שלכם>/<שם-הפרויקט>.git
-cd <שם-הפרויקט>
+git clone https://github.com/AssafSteinberg/dogs-api.git
+cd dogs-api
+npm install
+npm run dev
 ```
 
-**3 · בודקים שהיומן עובד.** פתחו את הסוכן **מתוך תיקיית הפרויקט**, שלחו לו הודעה כלשהי, ואז:
+Then open the address printed in the terminal (normally <http://localhost:5173>).
 
-```bash
-tail -n 20 PROMPTS.md
-```
-
-רואים את ההודעה? מצוין. לא רואים? ראו "כשזה לא עובד" למטה. **אל תמשיכו לפני שזה עובד.**
-
-**4 · יוצרים את אפליקציית Vite באותה תיקייה** (שימו לב לנקודה אחרי `@latest`):
-
-```bash
-npm create vite@latest . -- --template react-ts
-```
-
-כשמופיעה השאלה `Current directory is not empty`, בחרו **Ignore files and continue**.
-
-> ⚠️ **לא** לבחור `Remove existing files and continue` — זה מוחק את ה-hooks ואת `PROMPTS.md`, והיומן נעלם.
-
-Vite יחליף את `README.md` ואת `.gitignore` בגרסאות שלו. זה בסדר: את ה-README תכתבו מחדש, על הפרויקט שלכם.
-
-**5 · commit ראשון**, ומשם — משימה אחת בכל פעם, ו-commit אחרי כל משימה.
-
-## מה יש כאן
-
-```
-.claude/settings.json        hook ל-Claude Code
-.codex/hooks.json            hook ל-Codex
-.gemini/settings.json        hook ל-Gemini CLI
-.agents/hooks.json           hook ל-Antigravity
-.github/hooks/log-prompt.json  hook ל-GitHub Copilot (ב-VS Code וב-Copilot CLI)
-scripts/log-prompt.mjs       הסקריפט שכותב ל-PROMPTS.md
-AGENTS.md, CLAUDE.md         כללי עבודה לסוכן: משימה אחת בכל פעם, בלי commit בשבילכם
-PROMPTS.md                   היומן — נכתב אוטומטית
-```
-
-## איך היומן עובד
-
-לסוכנים יש **hooks**: נקודות שבהן הם מריצים פקודה משלכם. כאן מחובר hook שרץ **בכל פעם שאתם שולחים הודעה לסוכן**.
-הוא מעביר את הפרומפט לסקריפט `scripts/log-prompt.mjs`, והסקריפט מוסיף אותו ל-`PROMPTS.md` עם השעה ושם הסוכן.
-
-```markdown
-## 2026-10-14
-
-**18:42 · claude**
-
-> תוסיף שדה חיפוש מעל הרשימה
-
-**18:55 · claude**
-
-> החיפוש מוחק את הרשימה כשמוחקים את כל האותיות. תתקן
-```
-
-הרשומה השנייה היא בדיוק מה שאנחנו מחפשים: **תהליך**. ניסיון, בדיקה, תיקון.
-
-| סוכן | הערה |
+| Command | What it does |
 |---|---|
-| **Claude Code** | בהפעלה הראשונה צריך לאשר את ה-hook פעם אחת. |
-| **Codex CLI** | אוטומטי. |
-| **Gemini CLI** | בהפעלה הראשונה תופיע אזהרה על hook חדש בפרויקט. זה ה-hook הזה. |
-| **Antigravity** | ה-hook לא מקבל את הפרומפט עצמו, אז הרשומה מופיעה רק כשהסוכן מסיים לענות. |
-| **GitHub Copilot** | ב-VS Code: צריך לאשר שאתם סומכים על התיקייה (Trust). |
-| **כלים אחרים** (Cursor ועוד) | אין hook. ב-`AGENTS.md` יש הוראה לסוכן לרשום כל הודעה בעצמו — ודאו שהוא עושה את זה. |
+| `npm run dev` | Starts the development server with hot reload. |
+| `npm run build` | Type-checks (strict TypeScript) and builds the production bundle into `dist/`. |
+| `npm run preview` | Serves the production build locally, to try it before deploying. |
+| `npm run lint` | Runs [Oxlint](https://oxc.rs). |
+| `npm test` | Runs the offline test suite once. |
+| `npm run test:ui` | Opens the Vitest dashboard for the offline suite. |
+| `npm run test:live` | Runs the few tests that call the real Dog CEO API. |
 
-## כשזה לא עובד
+**Deploying.** The result of `npm run build` is a static site, and no server code is needed. The app uses normal browser URLs (not `#` URLs), so the host must serve `index.html` for any path it does not recognise. Otherwise opening or reloading a link such as `/breeds/hound/afghan` returns a 404.
 
-- ודאו ש-`node -v` מציג מספר גרסה.
-- ודאו שפתחתם את הסוכן **מתוך תיקיית הפרויקט**, ולא מתיקייה מעליה.
-- עדיין לא עובד? הוסיפו את הרשומה בעצמכם, באותו פורמט, ותגידו לי.
+**Resetting.** To start with an empty Pack and Wishlist, clear this site's data in your browser (the key is `dogs-api:v1:collection`).
 
-## היומן והציון
+## Tests overview
 
-- **commit ל-`PROMPTS.md` יחד עם הקוד**, אחרי כל משימה.
-- אחרי כל משימה הוסיפו שורה משלכם: מה בדקתם, ומה שיניתם בעצמכם.
-- אל תערכו את היומן בדיעבד כדי שייראה יפה. יומן מסודר מדי בולט לרעה.
+Tests use [Vitest](https://vitest.dev/) with [Testing Library](https://testing-library.com/) and jsdom. They are split into two projects:
 
-> **פרטיות:** כל מה שאתם כותבים לסוכן נשמר בקובץ ועולה ל-GitHub. אל תכתבו בפרומפטים סיסמאות, מפתחות, או פרטים אישיים של מישהו.
+- **Offline suite (`npm test`): 270 tests in 22 files.** Never touches the network; the API is replaced with small copies of real responses. This, together with `npm run lint` and `npm run build`, is the gate every change had to pass.
+- **Live suite (`npm run test:live`): 10 tests in 3 files.** Calls the real Dog CEO API, so it needs internet and is not part of the gate.
+
+What the offline suite covers:
+
+| Area | Examples |
+|---|---|
+| Pure logic | Breed and sub-breed ids and names, flattening the API response into the 165 elements, filter and sort, the Pack and Wishlist reducer. |
+| API layer | The client and its error kinds (network, HTTP, unexpected shape), response validation. |
+| Saved data | Reading and writing `localStorage`, corrupt or blocked storage, the one-time console warning when the browser cannot store. |
+| Providers and hooks | Loading the breed list once (including React StrictMode), the random-image cache and Retry, notifications and the red pop-up, the Pack and Wishlist state. |
+| Components and pages | Routing and redirects, the collapsible sidebar and drawer, the list rows, expansion driven by the URL, the details, the filter and sort toolbar, the Pack and Wishlist pages. |
+
+Every feature was written test-first on its own branch: the tests were written and seen failing, then the feature was built until they passed.
+
+A note on what the tests cannot show: they run in Node, which does not enforce browser CORS rules, and jsdom does not lay out pages. Before release, the built app was therefore also checked in a real Chrome against the real API: CORS, the 165-element list, expansion and deep links, Pack and Wishlist persistence across a browser restart, error states, and no horizontal scrolling at 320, 375, 768 and 1280 px.
+
+## Dog API reference
+
+The app uses the free **[Dog CEO Dog API](https://dog.ceo/dog-api/)** ([documentation](https://dog.ceo/dog-api/documentation/)). It needs no API key, and it allows browser requests from any origin (CORS), which is what makes a purely client-side app possible. It was checked on 2026-11-05.
+
+Base URL: `https://dog.ceo/api`
+
+| What the app needs | Endpoint | Response |
+|---|---|---|
+| All breeds and their sub-breeds | `GET /breeds/list/all` | `{ "message": { "hound": ["afghan", "basset", ...], "akita": [], ... }, "status": "success" }` |
+| A random image of a sub-breed | `GET /breed/{breed}/{sub}/images/random` | `{ "message": "https://images.dog.ceo/breeds/hound-afghan/....jpg", "status": "success" }` |
+| A random image of a breed without sub-breeds | `GET /breed/{breed}/images/random` | Same shape |
+
+An unknown breed answers with HTTP 404 and `{ "status": "error", "message": "...", "code": 404 }`.
+
+Things worth knowing:
+
+- **Community-run.** There is no service guarantee, which is why the app shows clear error states and keeps working when a request fails. The API's status page is at <https://status.dog.ceo>.
+- **Where the photos come from.** The Dog API credits the [Stanford Dogs Dataset](http://vision.stanford.edu/aditya86/ImageNetDogs/) as its original source of images.
+
+## Shoutout
+
+- **The Dog CEO Dog API** and its maintainer, [Elliott Landsborough](https://github.com/ElliottLandsborough/dog-ceo-api), and contributors, for running a free, open and friendly API that anyone can build on without signing up for anything. If you find it useful, the [About page](https://dog.ceo/dog-api/about) explains how to help with the hosting costs.
+- **The Stanford Dogs Dataset** and the people behind it, for the photographs.
+- **The open-source tools** this project stands on: [React](https://react.dev/), [Vite](https://vite.dev/), [React Router](https://reactrouter.com/), [TypeScript](https://www.typescriptlang.org/), [Vitest](https://vitest.dev/), [Testing Library](https://testing-library.com/) and [Oxlint](https://oxc.rs).
