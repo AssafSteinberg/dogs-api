@@ -282,3 +282,13 @@
 **18:04 · claude**
 
 > tag v1.0. remove isStorageAvailable code. I changed the favicon.
+
+## 2026-11-05
+
+**18:10 · claude**
+
+> Let's rewrite the README. Sections to include - Overview (based on the PRD), Key features, How to run?, Tests overview, dogs API ref and shoutout. Show me before commiting
+
+**19:50 · claude**
+
+> I made a few changes. This is a good version, you can add it to the master
