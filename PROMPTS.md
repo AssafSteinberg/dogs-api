@@ -292,3 +292,13 @@
 **19:50 · claude**
 
 > I made a few changes. This is a good version, you can add it to the master
+
+## 2026-11-05
+
+**20:06 · claude**
+
+> I went through the requirements again, to play on the safe side, let's turn the details route into a distinct page altogether instead of an expanding component. So the breed's name on the "/breeds" page is only a navlink. Item page should not show up on the sidebar, it can only be reached through clicking a breed. Leave the component on that page super simple, exactly like expanding panel from the current version. No additions. Do this, of course, in a different branch, according to the development guidelines stated before. Before starting, plan the change, describe it, and only after I approve it, start working.
+
+**20:14 · claude**
+
+> Decisions - 1 - Unknown item URL - show a static 404 page, just text, nothing special.2 - No need to carry sort and filter params. 3 - accepted. 4 - change it to an h1. 5 - keep the tag. Given these answers implemented, plan approved. Execute all changes, Just halt before merging with master.
