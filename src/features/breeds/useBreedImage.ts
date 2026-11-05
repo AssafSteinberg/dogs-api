@@ -43,12 +43,12 @@ export function useBreedImage(leaf: Leaf): BreedImageState {
         if (controller.signal.aborted) return
         imageCache.set(leaf.id, url)
         setSettled({ id: leaf.id, url })
-        clear('api')
+        clear()
       } catch (error) {
         if (controller.signal.aborted) return
         setSettled({ id: leaf.id, url: null })
         // A 404 for one breed is not an outage; only an unreachable or broken API gets the pop-up.
-        if (isApiOutage(error)) notify(API_OUTAGE_MESSAGE, 'api')
+        if (isApiOutage(error)) notify(API_OUTAGE_MESSAGE)
       }
     }
     void load()

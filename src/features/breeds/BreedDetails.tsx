@@ -6,12 +6,11 @@ import { leafFullName, leafTag, type Leaf } from '../../domain/leaf'
 import { usePack, useWishlist } from '../../state/collection'
 import '../../styles/variables.css'
 import styles from './BreedDetails.module.css'
-import { detailsId } from './detailsId'
 import { useBreedImage } from './useBreedImage'
 
 /**
- * The details of the expanded row (FR-D-2 to D-5): the name and breed tag, one random
- * image with its call status, and the Add to Pack and Wishlist actions.
+ * The content of an element's item page (FR-D-2 to D-5): the name as the page heading and the
+ * breed tag, one random image with its call status, and the Add to Pack and Wishlist actions.
  */
 export function BreedDetails({ leaf }: { leaf: Leaf }) {
   const image = useBreedImage(leaf)
@@ -35,9 +34,9 @@ export function BreedDetails({ leaf }: { leaf: Leaf }) {
   }
 
   return (
-    <section id={detailsId(leaf.id)} className={styles.details} aria-label={`${name} details`}>
+    <section className={styles.details} aria-label={`${name} details`}>
       <div className={styles.heading}>
-        <h2 className={styles.title}>{name}</h2>
+        <h1 className={styles.title}>{name}</h1>
         {tag !== null && <Tag>{tag}</Tag>}
       </div>
 

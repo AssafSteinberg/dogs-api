@@ -1,7 +1,7 @@
 # Implementation Plan — Dog Breed Explorer
 
-Status: v4, approved (banner task replaced by a console warning) · Date: 2026-11-05
-Sources of truth: `PRD.md` (Draft v4) and `architecture.md` (Draft v3). Requirement IDs (FR-…) refer to the PRD; section numbers refer to `architecture.md`.
+Status: v5, approved (milestone v1.1 added: the expanding panel becomes an item page) · Date: 2026-11-05
+Sources of truth: `PRD.md` (Draft v5) and `architecture.md` (Draft v4). Requirement IDs (FR-…) refer to the PRD; section numbers refer to `architecture.md`.
 **Implementation starts only when this file is approved.**
 
 ## 1. Working agreement
@@ -39,6 +39,7 @@ A milestone is cleared only when `npm test` (at least 5 tests, all passing), `np
 | **v0.3 Browse** | T19 | Complete Breeds page |
 | **v0.4 Collections** | T21 | Pack and Wishlist pages |
 | **v1.0 Release candidate** | T23 | Responsive pass and PRD acceptance walkthrough done |
+| **v1.1 Item page** | T26 | The master list links to item pages instead of expanding; verified in a real browser |
 
 ## 2. Tasks
 
@@ -95,8 +96,8 @@ Test files live in `tests/`, named after the unit (e.g. `tests/leaf.test.ts`). "
 ### Milestone v0.2 — Shell and data
 
 #### T09 · Notifications and the red pop-up · `task/09-notifications-toast`
-- **Scope:** `src/state/notifications.tsx` (`NotificationsProvider`, `useNotify()` with `source: 'api' | 'route'`, de-duplication by message, dismiss, clear-on-API-success) and `src/components/Toast.tsx` (red, bottom of the screen, `role="alert"`, dismiss button). Architecture 6.5.
-- **Tests (red first):** (1) `notify` shows a red alert with the message; (2) the same message twice shows one pop-up (FR-D-9); (3) the dismiss button removes it; (4) an API-success signal clears `source: 'api'` pop-ups but not `source: 'route'` ones.
+- **Scope:** `src/state/notifications.tsx` (`NotificationsProvider`, `useNotify()` with `notify(message)`, `dismiss(id)` and `clear()`, de-duplication by message, clear-on-API-success; the `source: 'api' | 'route'` it first had was removed when the item page replaced the unknown-URL pop-up) and `src/components/Toast.tsx` (red, bottom of the screen, `role="alert"`, dismiss button). Architecture 6.5.
+- **Tests (red first):** (1) `notify` shows a red alert with the message; (2) the same message twice shows one pop-up (FR-D-9); (3) the dismiss button removes it; (4) `clear()` (an API success) removes the pop-ups.
 - **Done when:** tests green.
 
 #### T10 · API status indicator · `task/10-api-status`
@@ -132,6 +133,8 @@ Test files live in `tests/`, named after the unit (e.g. `tests/leaf.test.ts`). "
 ---
 
 ### Milestone v0.3 — Browse
+
+> **Superseded in part:** the expand-in-place behaviour described in T16 to T19 was replaced by a separate item page in milestone v1.1 (T24 and T25). These entries are kept as the history of how the first version was built.
 
 #### T16 · Breed list row · `task/16-breed-item`
 - **Scope:** `BreedItem` (memoised): name, tag chip for sub-breeds only, wishlist marker, toggle `<button>` with `aria-expanded` and `aria-controls`, calling an `onToggle` prop (FR-M-2, FR-W-4, FR-D-7).
@@ -182,10 +185,33 @@ Test files live in `tests/`, named after the unit (e.g. `tests/leaf.test.ts`). "
 - **Tests:** none new; `npm test` (at least 5 tests), `npm run lint` and `npm run build` must pass.
 - **Done when:** every acceptance criterion is reported as met, or the gaps are listed for your decision. **Milestone v1.0 gate.**
 
+---
+
+### Milestone v1.1 — Item page
+
+The master list stops expanding. Each breed name is a link to its own page, and that page shows exactly what the expanding panel showed, with the name as the page's `h1` and nothing else (PRD 4.3, architecture 4 and 5). These tasks work on `dev`, and nothing is merged into `main` until you order the milestone merge.
+
+#### T24 · Item page and routes · `task/24-item-page`
+- **Scope:** new `BreedPage.tsx`; in `App.tsx` the route `breeds` renders `BreedsPage` and `breeds/:breed/:sub?` renders `BreedPage`. `BreedPage` finds the element from the URL: Loading while the list loads and Failed with Retry if it fails (`AsyncState`, FR-D-11); found → `BreedDetails`; not found (`/breeds/hound/nothing`, `/breeds/hound`, `/breeds/nosuchbreed`) → a **static 404 page**, plain text, no pop-up (FR-D-1b). `BreedDetails` is unchanged except that the element's name becomes an `h1` and its unused `id` is removed (`detailsId.ts` goes in T25, with the row's `aria-controls`). `BreedsPage` stops reading `:breed/:sub` and loses the expansion, scroll-into-view, pinned-leaf and not-found-pop-up code; until T25 a row's toggle simply navigates to `/breeds/<id>`.
+- **Tests (red first, `MemoryRouter` with the real `App`):** (1) `/breeds/hound/afghan` shows the item page: `h1` "Afghan Hound", the tag "Hound", the image, Add to Pack and Add to Wishlist, and no list; `/breeds/akita` the same without a tag; (2) while the list loads the page shows Loading, and if it fails Failed with Retry, and Retry brings the page; (3) `/breeds/hound/nothing`, `/breeds/hound` and `/breeds/nosuchbreed` show the static 404 text only: no pop-up, no list, no image request; (4) opening the same item page twice shows the same image with one image request (FR-D-4); (5) Add to Pack twice shows "In your pack: 2" and Add to Wishlist flips to "On wishlist" with no duplicate on a second click; (6) the sidebar's Breeds link is marked current on an item page and the sidebar has no link to an item page; (7) `/breeds` shows the list and no item page.
+- **Done when:** tests green. The tests that described expanding are removed or rewritten because that behaviour no longer exists.
+
+#### T25 · Breed rows are links · `task/25-row-links`
+- **Scope:** `BreedItem`: the toggle `<button>` becomes a `<Link to="/breeds/<id>">` holding the name, the tag (sub-breeds only) and the wishlist marker. The chevron, `aria-expanded`, `aria-controls`, the `children` slot and the `onToggle` prop are removed. The link carries **no** query string. `BreedList` and `BreedsPage` lose the toggle plumbing. Nothing is added.
+- **Tests (red first):** (1) each row is a link with the right `href` (`/breeds/hound/afghan`, `/breeds/akita`) and no `aria-expanded`; (2) the name and tag are as before, and a breed without sub-breeds has no tag; (3) following a link with a click, and with Enter, opens the item page, and Back returns to the list; (4) from `/breeds?q=ha&sort=desc` a row link goes to the plain item URL, and Back restores the filtered, sorted list; (5) a wishlisted element shows the marker; (6) a re-render of the list with the same props does not re-render its rows (kept from T16).
+- **Done when:** tests green.
+
+#### T26 · Real-browser verification · `task/26-verify-item-page`
+- **Type:** verification task, with fixes only if a defect is found. No new feature.
+- **Scope:** with throwaway scripts outside the repo, re-run in real Chrome against the real API (a) the responsive check on the list, an item page, the Pack and the Wishlist at 320, 375, 768 and 1280 px (no horizontal scroll, 44 px tap targets, sidebar behaviour, images scale), and (b) the acceptance walkthrough adapted to the item page (criteria 1 to 12). Also check and **report** what Back does to the list's scroll position (PRD risk 9); fixing it would be an addition, so it is not done without your say-so.
+- **Checks (instead of red tests):** a written checklist, reported to you with pass/fail. Existing tests stay green.
+- **Done when:** the checklist is all pass and you have seen it. **Milestone v1.1 gate.**
+
 ## 3. Not in this plan
 - **Deployment.** The production host is undecided (PRD open item 8). A deployment task is added only after you choose a host; it would need the "serve `index.html` for unknown paths" rule.
 - A visible storage-unavailable banner: dropped; the app logs a console warning instead (FR-U-4).
 - Anything outside the PRD's scope: accounts or a backend, extra filters, images on the Pack and Wishlist pages, a "new random image" button, cross-tab sync.
+- Extras on the item page: a back link, breadcrumbs, scroll restoration, carrying the filter to the item page. The page shows exactly what the old panel showed.
 
 ## 4. Test coverage map
 The 12 tests required by `architecture.md` section 10.2 are all covered by the tasks above (the tasks contain more):
@@ -197,10 +223,10 @@ The 12 tests required by `architecture.md` section 10.2 are all covered by the t
 | 3 filter and sort | T06 |
 | 4 reducer | T08 |
 | 5 storage | T07 |
-| 6 tags | T17 |
-| 7 expansion and URL | T17 |
-| 8 image failure and pop-up | T12, T18 |
-| 9 unknown URL pop-up | T17 |
+| 6 tags and row links | T17, T25 |
+| 7 item page and URL | T24, T25 |
+| 8 image failure and pop-up | T12, T18, T24 |
+| 9 unknown item URL (static 404) | T24 |
 | 10 filter and sort UI | T19 |
 | 11 pack count and wishlist button | T18, T20 |
 | 12 sidebar toggle | T14 |

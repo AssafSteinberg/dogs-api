@@ -282,3 +282,43 @@
 **18:04 · claude**
 
 > tag v1.0. remove isStorageAvailable code. I changed the favicon.
+
+## 2026-11-05
+
+**18:10 · claude**
+
+> Let's rewrite the README. Sections to include - Overview (based on the PRD), Key features, How to run?, Tests overview, dogs API ref and shoutout. Show me before commiting
+
+**19:50 · claude**
+
+> I made a few changes. This is a good version, you can add it to the master
+
+## 2026-11-05
+
+**20:06 · claude**
+
+> I went through the requirements again, to play on the safe side, let's turn the details route into a distinct page altogether instead of an expanding component. So the breed's name on the "/breeds" page is only a navlink. Item page should not show up on the sidebar, it can only be reached through clicking a breed. Leave the component on that page super simple, exactly like expanding panel from the current version. No additions. Do this, of course, in a different branch, according to the development guidelines stated before. Before starting, plan the change, describe it, and only after I approve it, start working.
+
+**20:14 · claude**
+
+> Decisions - 1 - Unknown item URL - show a static 404 page, just text, nothing special.2 - No need to carry sort and filter params. 3 - accepted. 4 - change it to an h1. 5 - keep the tag. Given these answers implemented, plan approved. Execute all changes, Just halt before merging with master.
+
+## 2026-11-05
+
+**20:43 · claude**
+
+> remove unused pop-up code
+
+**20:49 · claude**
+
+> commit and merge with dev
+
+## 2026-11-05
+
+**22:03 · claude**
+
+> push
+
+**22:04 · claude**
+
+> merge dev into main and tag v1.1, don't forget prompts too
