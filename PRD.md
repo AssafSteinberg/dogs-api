@@ -49,7 +49,7 @@ Dog enthusiasts and hobbyists who like exploring the variety of breeds and build
 
 ### 4.2 Master list (Breeds page)
 - **FR-M-1** One list element per **leaf**: each sub-breed of a breed that has sub-breeds, and each breed that has none. With the current API data this is 165 elements (99 sub-breeds plus 66 breeds without sub-breeds).
-- **FR-M-2** Every element shows its display name. **Only sub-breed elements** also show a **breed tag** chip naming the breed they belong to (e.g. "afghan" tagged "hound"). An element for a breed without sub-breeds (e.g. "akita") has **no tag**.
+- **FR-M-2** Every element shows its full display name: a sub-breed is shown as the sub-breed followed by its breed ("Blood Hound"), and a breed without sub-breeds as the breed alone ("Akita"). **Only sub-breed elements** also show a **breed tag** chip naming the breed they belong to, unchanged by the full name ("Blood Hound" tagged "Hound"). An element for a breed without sub-breeds has **no tag**.
 - **FR-M-3** Elements of the same breed are kept together (list ordered by breed, then sub-breed, in the chosen sort direction, see FR-M-5), so the tag chips group sub-breeds visually. There are no section headers.
 - **FR-M-4** The list loads from one request when the page opens, with a loading state and an error state with a retry action.
 - **FR-M-5** The user can **sort** the list by breed name, ascending or descending. Sub-breeds of one breed stay together and follow the same direction. Default: ascending.
@@ -64,7 +64,7 @@ Dog enthusiasts and hobbyists who like exploring the variety of breeds and build
 - **FR-D-2** The details show one **random image** of that sub-breed (or of the breed, if it has no sub-breeds), fetched from the matching Dog CEO endpoint when the element is first expanded.
 - **FR-D-3** The details show the name, the breed tag (sub-breeds only, per FR-M-2) and the action buttons: **Add to Pack** and **Add to Wishlist**.
 - **FR-D-4** The image is fetched on first expand only and kept for the rest of the session, so collapsing and re-expanding shows the same image.
-- **FR-D-5** The image has its own loading and failure state with a retry action. A failure message names the breed or sub-breed (e.g. "Couldn't load an image of Afghan (hound)"). A failed image never breaks the list.
+- **FR-D-5** The image has its own loading and failure state with a retry action. A failure message names the breed or sub-breed (e.g. "Couldn't load an image of Afghan Hound"). A failed image never breaks the list.
 - **FR-D-6** Only **one** element is expanded at a time, because the URL names a single element. Expanding another collapses the current one.
 - **FR-D-7** Expansion is fully keyboard-accessible.
 - **FR-D-8** Every API call (the breed list, and each image) shows a visible status: **Loading**, **Failed** or **Done**. Each state has an icon and a text label, not colour alone, and is announced to assistive technology.
@@ -74,7 +74,7 @@ Dog enthusiasts and hobbyists who like exploring the variety of breeds and build
 ### 4.4 Pack and Wishlist
 **My Pack**
 - **FR-P-1** From an element's details, the user can add that (sub-)breed to the Pack **any number of times**; the same sub-breed can appear several times.
-- **FR-P-2** The Pack page shows **one row per (sub-)breed with a count** (e.g. "Afghan × 3"), with the breed tag on sub-breed rows (none for breeds without sub-breeds).
+- **FR-P-2** The Pack page shows **one row per (sub-)breed with a count** (e.g. "Afghan Hound × 3"), with the breed tag on sub-breed rows (none for breeds without sub-breeds).
 - **FR-P-3** The user can remove from the Pack page one at a time: each removal lowers the count by one, and the row disappears when the count reaches zero.
 - **FR-P-4** The Pack page shows an empty state with a link to the Breeds page.
 
@@ -113,7 +113,7 @@ Limitations that shape the product:
 - The API provides **names and images only**. There is no description, origin, temperament or size, so the details view is intentionally small.
 - Using `/breed/{breed}/images/random` for a breed that **has** sub-breeds returns an image of a random sub-breed. The app must therefore always use the sub-breed endpoint for sub-breeds.
 - The random image is different on every request; consistency comes from fetching once per session (FR-D-4).
-- Names are lowercase API keys. For display, the element name is the capitalised sub-breed (or breed, when it has no sub-breeds), and the tag is the capitalised breed: "Afghan" tagged "Hound", "Akita" with no tag.
+- Names are lowercase API keys. For display, the element name is the capitalised sub-breed followed by the capitalised breed ("Afghan Hound"), or the capitalised breed alone when it has no sub-breeds ("Akita"). The tag is the capitalised breed, shown on sub-breed elements only: "Afghan Hound" tagged "Hound", "Akita" with no tag. This simple pattern reads naturally for most sub-breeds; a few (e.g. "Wild African", "Shepherd German") read backwards and are accepted as they are for v1.
 
 ## 6. Non-functional requirements
 - **Language and stack:** React + Vite + React Router, **strictly TypeScript** (no `any`; API responses are typed and validated at the boundary).

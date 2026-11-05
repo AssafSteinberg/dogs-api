@@ -42,7 +42,7 @@ interface Leaf {
 
 - **The LeafId is also the URL path and the API path.** `hound/afghan` maps to `/breeds/hound/afghan` in the app and `/breed/hound/afghan/images/random` in the API; `akita` maps to `/breeds/akita` and `/breed/akita/images/random`. One identifier, three uses.
 - The same ID is what the Pack and Wishlist store (PRD FR-U-2).
-- **Display:** the name is the capitalised `sub` (or `breed` when `sub` is null) and the **tag** is the capitalised `breed`, shown only when `sub !== null` (FR-M-2). Display strings are derived in one module, never stored.
+- **Display:** the full name is the capitalised `sub` followed by the capitalised `breed` ("Blood Hound"), or just the capitalised `breed` when `sub` is null ("Akita"), via `leafFullName`; the **tag** is the capitalised `breed`, shown only when `sub !== null` and unchanged by the full name (FR-M-2). `leafName` (the short name, "Blood") remains for code that needs it. Display strings are derived in one module, never stored, and never affect the `LeafId`.
 - Brand helpers (`toLeafId`, `parseLeafId`) are the only place that builds or splits a `LeafId`.
 
 ### Flattening
@@ -165,7 +165,7 @@ A toolbar above the list (`BreedsToolbar`) has a **filter text box** and a **sor
 - A module-level `Map<LeafId, string>` holds resolved URLs for the session. This satisfies FR-D-4: the first expand fetches, and later expands of the same leaf reuse the same image without another request. There is no separate in-flight map: under React StrictMode (development) the effect runs twice, so the first request is aborted and ignored, as in the breed list (6.2).
 - Hook state: `{ status: 'loading' | 'failed' | 'done', url, retry }`. A failed fetch is *not* cached, so retry makes a new request (FR-D-5).
 - The cache is intentionally in memory only: a page reload gives a new random image, and no image data is ever stored (FR-U-2).
-- **Failure messages name the breed.** Both failure paths, the API request failing and the `<img>` `onError` (the URL resolved but the file would not load), show the same message built from the display name: `Couldn't load an image of Afghan (hound)` for a sub-breed, or `Couldn't load an image of Akita` for a breed without sub-breeds, with a Retry button. The `<img>` `alt` text uses the same name.
+- **Failure messages name the breed.** Both failure paths, the API request failing and the `<img>` `onError` (the URL resolved but the file would not load), show the same message built from the display name: `Couldn't load an image of Afghan Hound` for a sub-breed, or `Couldn't load an image of Akita` for a breed without sub-breeds, with a Retry button. The `<img>` `alt` text uses the same name.
 
 ### 6.4 API call status indicator (FR-D-8)
 - Every API-backed region shows its status with the shared `ApiStatus` component, which renders one of three visible states, each with an icon, a text label and a colour (never colour alone):
@@ -278,7 +278,7 @@ Dev dependencies to add: `vitest`, `@vitest/ui`, `jsdom`, `@testing-library/reac
 | 5 | `storage.ts` recovers from corrupt JSON, a wrong version and a throwing `localStorage` | Logic |
 | 6 | Breeds page: sub-breed rows show a breed tag; breeds without sub-breeds show none | UI |
 | 7 | Clicking a row expands it and changes the URL to `/breeds/hound/afghan`; clicking again returns to `/breeds`; a deep link renders the row expanded | UI |
-| 8 | Image failure shows `Couldn't load an image of Afghan (hound)` with Retry, and the red pop-up appears when `fetch` rejects | UI |
+| 8 | Image failure shows `Couldn't load an image of Afghan Hound` with Retry, and the red pop-up appears when `fetch` rejects | UI |
 | 9 | Unknown URL (`/breeds/hound/nothing`) shows the collapsed list and the red pop-up naming it | UI |
 | 10 | Typing in the filter narrows the list and updates `?q=`; the sort toggle reverses the order | UI |
 | 11 | Pack: adding the same sub-breed twice shows a count of 2; the wishlist button flips to "On wishlist" | UI |
